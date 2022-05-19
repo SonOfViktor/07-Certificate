@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ActiveProfiles("test")
 @Transactional
 class GiftCertificateTagDaoImplTest {
+    public static final String MODULE_TWO_GIFT_CERTIFICATE_TAG = "module_two.gift_certificate_tag";
     private GiftCertificateTagDao giftCertificateTagDao;
     private TagDao tagDao;
     private GiftCertificateDao giftCertificateDao;
@@ -48,7 +49,7 @@ class GiftCertificateTagDaoImplTest {
         Set<Tag> tags = Set.of(new Tag(1, "food"),
                 new Tag(3, "shoe"), new Tag(5, "paper"));
         giftCertificateTagDao.createGiftCertificateTagEntries(1, tags);
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "gift_certificate_tag");
+        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_GIFT_CERTIFICATE_TAG);
         int expected = 17;
         assertEquals(expected, actual);
     }
@@ -57,7 +58,7 @@ class GiftCertificateTagDaoImplTest {
     @Rollback
     void testDeleteGiftCertificateCascade() {
         giftCertificateDao.deleteGiftCertificate(1);
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "gift_certificate_tag");
+        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_GIFT_CERTIFICATE_TAG);
         int expected = 11;
         assertEquals(expected, actual);
     }
@@ -66,7 +67,7 @@ class GiftCertificateTagDaoImplTest {
     @Rollback
     void testDeleteTagCascade() {
         tagDao.deleteTag(6);
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "gift_certificate_tag");
+        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_GIFT_CERTIFICATE_TAG);
         int expected = 10;
         assertEquals(expected, actual);
     }

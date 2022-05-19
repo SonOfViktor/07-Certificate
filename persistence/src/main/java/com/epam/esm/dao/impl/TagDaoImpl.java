@@ -19,24 +19,24 @@ import java.util.Set;
 @Repository
 public class TagDaoImpl implements TagDao {
     private static final String INSERT_TAG_SQL = """
-            INSERT INTO tag (name) VALUES (:name)
+            INSERT INTO module_two.tag (name) VALUES (:name)
             ON DUPLICATE KEY UPDATE  name = name
             """;
     private static final String READ_ALL_TAGS_BY_CERTIFICATE_ID = """
-            SELECT tag_id, tag.name FROM tag
-            JOIN gift_certificate_tag ON tag_id = gct_tag_id
-            JOIN gift_certificate ON gct_gift_certificate_id = gift_certificate_id
+            SELECT tag_id, tag.name FROM module_two.tag
+            JOIN module_two.gift_certificate_tag ON tag_id = gct_tag_id
+            JOIN module_two.gift_certificate ON gct_gift_certificate_id = gift_certificate_id
             WHERE gift_certificate_id = ?
             """;
     private static final String READ_ALL_TAGS_SQL = """
-            SELECT tag_id, name FROM tag
+            SELECT tag_id, name FROM module_two.tag
             """;
     private static final String READ_TAG_SQL = """
-            SELECT tag_id, name FROM tag
+            SELECT tag_id, name FROM module_two.tag
             WHERE tag_id = ?
             """;
     private static final String DELETE_TAG_SQL = """
-            DELETE FROM tag WHERE tag_id = ?
+            DELETE FROM module_two.tag WHERE tag_id = ?
             """;
 
     private final JdbcTemplate jdbcTemplate;

@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @Repository
 public class GiftCertificateDaoImpl implements GiftCertificateDao {
-    private static final String GIFT_CERTIFICATE_TABLE = "gift_certificate";
+    private static final String GIFT_CERTIFICATE_TABLE = "module_two.gift_certificate";
     private static final String NAME_COLUMN = "name";
     private static final String DESCRIPTION_COLUMN = "description";
     private static final String PRICE_COLUMN = "price";
@@ -24,16 +24,16 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     private static final String READ_ALL_CERTIFICATE_SQL = """
             SELECT gift_certificate_id, gift_certificate.name, description, price, duration, create_date,
                 last_update_date
-            FROM gift_certificate
+            FROM module_two.gift_certificate
             """;
     private static final String READ_CERTIFICATE_BY_ID_SQL = """
             SELECT gift_certificate_id, gift_certificate.name, description, price, duration, create_date,
                 last_update_date
-            FROM gift_certificate
+            FROM module_two.gift_certificate
             WHERE gift_certificate_id = ?
             """;
     private static final String UPDATE_CERTIFICATE_BY_ID_SQL = """
-            UPDATE gift_certificate
+            UPDATE module_two.gift_certificate
             SET name = IF (TRIM(:name) <> '', :name, name),
             	description = IF (TRIM(:description) IS NOT NULL, :description, description),
                 price = IF (TRIM(:price) <> '', :price, price),
@@ -42,7 +42,7 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
             WHERE gift_certificate_id = :giftCertificateId
             """;
     private static final String DELETE_CERTIFICATE_SQL = """
-            DELETE FROM gift_certificate
+            DELETE FROM module_two.gift_certificate
             WHERE gift_certificate_id = ?
             """;
 

@@ -49,7 +49,7 @@ class GiftCertificateDaoImplTest {
 
     @Test
     void testTableRowQuantity() {
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "gift_certificate");
+        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "module_two.gift_certificate");
         int expected = 4;
         assertEquals(expected, actual);
     }
@@ -114,7 +114,7 @@ class GiftCertificateDaoImplTest {
     @Test
     void testDeleteGiftCertificate() {
         giftCertificateDao.deleteGiftCertificate(3);
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "gift_certificate");
+        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "module_two.gift_certificate");
         int expected = 3;
         assertEquals(expected, actual);
     }
@@ -123,7 +123,7 @@ class GiftCertificateDaoImplTest {
     @Test
     void testDeleteNonexistentGiftCertificate() {
         giftCertificateDao.deleteGiftCertificate(6);
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "gift_certificate");
+        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "module_two.gift_certificate");
         int expected = 4;
         assertEquals(expected, actual);
     }

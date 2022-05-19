@@ -2,7 +2,7 @@ CREATE SCHEMA module_two;
 -- -----------------------------------------------------
 -- Table `module_two`.`gift_certificate`
 -- -----------------------------------------------------
- CREATE TABLE IF NOT EXISTS `gift_certificate` (
+ CREATE TABLE IF NOT EXISTS `module_two`.`gift_certificate` (
     `gift_certificate_id` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(45) NOT NULL,
     `description` VARCHAR(500) NULL,
@@ -16,7 +16,7 @@ CREATE SCHEMA module_two;
 -- -----------------------------------------------------
 -- Table `module_two`.`tag`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tag` (
+CREATE TABLE IF NOT EXISTS `module_two`.`tag` (
     `tag_id` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(45) NOT NULL,
     CONSTRAINT name_unique UNIQUE (`name`),
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `tag` (
 -- -----------------------------------------------------
 -- Table `module_two`.`gift_certificate_tag`
 -- -----------------------------------------------------
- CREATE TABLE IF NOT EXISTS `gift_certificate_tag` (
+ CREATE TABLE IF NOT EXISTS `module_two`.`gift_certificate_tag` (
     `gct_gift_certificate_id` INT NOT NULL,
     `gct_tag_id` INT NOT NULL,
     PRIMARY KEY (`gct_gift_certificate_id`, `gct_tag_id`),

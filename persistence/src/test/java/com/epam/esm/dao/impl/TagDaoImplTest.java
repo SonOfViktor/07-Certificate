@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 @Transactional
 class TagDaoImplTest {
+    public static final String MODULE_TWO_TAG = "module_two.tag";
     private TagDao tagDao;
     private JdbcTemplate jdbcTemplate;
 
@@ -38,7 +39,7 @@ class TagDaoImplTest {
 
     @Test
     void testTableRowQuantity() {
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "tag");
+        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_TAG);
         int expected = 6;
         assertEquals(expected, actual);
     }
@@ -112,7 +113,7 @@ class TagDaoImplTest {
     @Rollback
     void testDeleteTag() {
         tagDao.deleteTag(6);
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "tag");
+        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_TAG);
         int expected = 5;
         assertEquals(expected, actual);
     }
@@ -121,7 +122,7 @@ class TagDaoImplTest {
     @Rollback
     void testDeleteNonexistentTag() {
         tagDao.deleteTag(7);
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "tag");
+        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_TAG);
         int expected = 6;
         assertEquals(expected, actual);
     }

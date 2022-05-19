@@ -14,7 +14,7 @@ import java.util.Set;
 @Repository
 public class GiftCertificateTagDaoImpl implements GiftCertificateTagDao {
     private static final String INSERT_ENTRY_SQL = """
-                INSERT IGNORE INTO gift_certificate_tag (gct_gift_certificate_id, gct_tag_id)
+                INSERT IGNORE INTO module_two.gift_certificate_tag (gct_gift_certificate_id, gct_tag_id)
                 VALUES (%s, (SELECT tag_id FROM tag WHERE tag.name = :name))
             """;
     JdbcTemplate jdbcTemplate;
