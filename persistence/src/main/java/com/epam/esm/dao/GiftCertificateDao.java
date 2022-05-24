@@ -1,7 +1,7 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.entity.GiftCertificate;
-
+import com.epam.esm.entity.SelectQueryParameter;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,11 +27,10 @@ public interface GiftCertificateDao {
     /**
      * Read gift certificates based on given sql script.
      *
-     * @param sql  the sql script to read specific gift certificates
-     * @param args the args sql script needs
+     * @param parameter  the object with parameters to filter gift certificates
      * @return the list of specific gift certificates by sql script
      */
-    List<GiftCertificate> readGiftCertificateWithParam(String sql, List<String> args);
+    List<GiftCertificate> readGiftCertificateWithParam(SelectQueryParameter parameter);
 
     /**
      * Read certain gift certificate.
@@ -47,7 +46,7 @@ public interface GiftCertificateDao {
      * @param certificate the certificate with data for updating old entry in database
      * @return the int id of updated gift certificate
      */
-    int updateGiftCertificate(GiftCertificate certificate);
+    GiftCertificate updateGiftCertificate(GiftCertificate certificate);
 
     /**
      * Delete gift certificate with specified id.
