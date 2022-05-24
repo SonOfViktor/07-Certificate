@@ -4,7 +4,7 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.Set;
+import java.util.List;
 
 public record CertificateTagsDto(
         @NotNull
@@ -12,7 +12,7 @@ public record CertificateTagsDto(
         GiftCertificate certificate,
 
         @Valid
-        Set<Tag> tags) {
+        List<Tag> tags) {
 
     @Override
     public String toString() {

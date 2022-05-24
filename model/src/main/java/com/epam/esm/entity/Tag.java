@@ -1,15 +1,25 @@
 package com.epam.esm.entity;
 
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+@Table(name = "tag", schema = "module_two")
+@Entity
 public class Tag {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int tagId;
 
     @NotNull
     @Size(min = 2, max = 45)
     private String name;
+
+    @ManyToMany(mappedBy = "tags")
+    private List<GiftCertificate> giftCertificates = new ArrayList<>();
 
     public Tag() {
     }
@@ -37,6 +47,14 @@ public class Tag {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<GiftCertificate> getGiftCertificates() {
+        return giftCertificates;
+    }
+
+    public void setGiftCertificates(List<GiftCertificate> giftCertificates) {
+        this.giftCertificates = giftCertificates;
     }
 
     @Override

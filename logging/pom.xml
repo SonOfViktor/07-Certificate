@@ -34,14 +34,14 @@
         </dependency>
 
         <dependency>
-            <groupId>com.epam.esm</groupId>
+            <groupId>com.epam</groupId>
             <artifactId>model</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
-            <groupId>com.epam.esm</groupId>
+            <groupId>com.epam</groupId>
             <artifactId>service</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>

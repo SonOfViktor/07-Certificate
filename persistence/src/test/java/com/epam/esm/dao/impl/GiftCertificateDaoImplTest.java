@@ -1,10 +1,10 @@
 package com.epam.esm.dao.impl;
 
-import com.epam.esm.constant.SelectQueryWithParameterSql;
 import com.epam.esm.dao.GiftCertificateDao;
+import com.epam.esm.dao.TagDao;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.SelectQueryParameter;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,11 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,8 +27,9 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static com.epam.esm.entity.SelectQueryOrder.ASC;
+import static com.epam.esm.entity.SelectQueryOrder.DESC;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,23 +37,25 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 @ActiveProfiles("test")
 @Transactional
 class GiftCertificateDaoImplTest {
+    public static final String MODULE_TWO_GIFT_CERTIFICATE = "module_two.gift_certificate";
     private GiftCertificateDao giftCertificateDao;
     private JdbcTemplate jdbcTemplate;
+    private TagDao tagDao;
 
     @Autowired
-    public GiftCertificateDaoImplTest(GiftCertificateDao giftCertificateDao, JdbcTemplate jdbcTemplate) {
+    public GiftCertificateDaoImplTest(GiftCertificateDao giftCertificateDao, JdbcTemplate jdbcTemplate, TagDao tagDao) {
         this.giftCertificateDao = giftCertificateDao;
         this.jdbcTemplate = jdbcTemplate;
+        this.tagDao = tagDao;
     }
 
     @Test
     void testTableRowQuantity() {
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "module_two.gift_certificate");
+        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_GIFT_CERTIFICATE);
         int expected = 4;
         assertEquals(expected, actual);
     }
 
-    @Rollback
     @Test
     void testCreateGiftCertificate() {
         GiftCertificate certificate = new GiftCertificate.GiftCertificateBuilder()
@@ -77,8 +78,8 @@ class GiftCertificateDaoImplTest {
 
     @ParameterizedTest()
     @MethodSource("stringQueryAndResult")
-    void testReadGiftCertificateWithParam(String sql, List<GiftCertificate> expected, List<String> args) {
-        List<GiftCertificate> actual = giftCertificateDao.readGiftCertificateWithParam(sql, args);
+    void testReadGiftCertificateWithParam(SelectQueryParameter parameter, List<GiftCertificate> expected) {
+        List<GiftCertificate> actual = giftCertificateDao.readGiftCertificateWithParam(parameter);
         assertEquals(expected, actual);
     }
 
@@ -96,36 +97,47 @@ class GiftCertificateDaoImplTest {
         assertThrows(NoSuchElementException.class, actual::get);
     }
 
-    @Rollback
+    @ParameterizedTest()
+    @MethodSource("updatingDataAndResult")
+    void testUpdateGiftCertificate(GiftCertificate updatingCertificate, GiftCertificate expected) {
+        GiftCertificate actual = giftCertificateDao.updateGiftCertificate(updatingCertificate).get();
+        expected.setLastUpdateDate(actual.getLastUpdateDate());
+
+        assertEquals(expected, actual);
+    }
+
     @Test
-    @Disabled("H2 don't support sql syntax of MySql :(")
-    void testUpdateGiftCertificate() {
+    void testUpdateNonExistentGiftCertificate() {
         GiftCertificate replaceCertificate = new GiftCertificate.GiftCertificateBuilder()
-                .setGiftCertificateId(1)
+                .setGiftCertificateId(6)
                 .setName("Milavitsa")
-                .setDescription("Our care for you")
                 .setDuration(40)
                 .createGiftCertificate();
-        int actual = giftCertificateDao.updateGiftCertificate(replaceCertificate);
-        assertEquals(1, actual);
+        assertTrue(giftCertificateDao.updateGiftCertificate(replaceCertificate).isEmpty());
     }
 
-    @Rollback
     @Test
     void testDeleteGiftCertificate() {
-        giftCertificateDao.deleteGiftCertificate(3);
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "module_two.gift_certificate");
-        int expected = 3;
-        assertEquals(expected, actual);
+        int expectedAffectedRow = 1;
+        int expectedCountRow = 3;
+
+        int actualAffectedRow = giftCertificateDao.deleteGiftCertificate(3);
+        int actualCountRow = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_GIFT_CERTIFICATE);
+
+        assertEquals(expectedAffectedRow, actualAffectedRow);
+        assertEquals(expectedCountRow, actualCountRow);
     }
 
-    @Rollback
     @Test
     void testDeleteNonexistentGiftCertificate() {
-        giftCertificateDao.deleteGiftCertificate(6);
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, "module_two.gift_certificate");
-        int expected = 4;
-        assertEquals(expected, actual);
+        int expectedAffectedRow = 0;
+        int expectedCountRow = 4;
+
+        int actualAffectedRow = giftCertificateDao.deleteGiftCertificate(6);
+        int actualCountRow = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_GIFT_CERTIFICATE);
+
+        assertEquals(expectedAffectedRow, actualAffectedRow);
+        assertEquals(expectedCountRow, actualCountRow);
     }
 
     @AfterAll
@@ -166,26 +178,71 @@ class GiftCertificateDaoImplTest {
 
     Stream<Arguments> stringQueryAndResult() {
         return Stream.of(
-                arguments(SelectQueryWithParameterSql.QUERY_WITH_PARAMS_1,
-                        createAllCertificateList().stream()
-                                .filter(certificate -> certificate.getGiftCertificateId() > 1 && certificate.getGiftCertificateId() != 3)
-                                .sorted(Comparator.comparing(GiftCertificate::getName))
-                                .toList(), List.of("paper", "%e%", "%two%")),
-                arguments(SelectQueryWithParameterSql.QUERY_WITH_PARAMS_2,
-                        createAllCertificateList().stream()
-                                .filter(certificate -> certificate.getGiftCertificateId() > 1 && certificate.getGiftCertificateId() != 3)
-                                .sorted(Comparator.comparing(GiftCertificate::getName))
-                                .toList(), List.of("paper", "%e%", "%two%")),
-                arguments(SelectQueryWithParameterSql.QUERY_WITH_PARAMS_3,
+                arguments(new SelectQueryParameter("paper", "e", "two", ASC, null),
                         createAllCertificateList().stream()
                                 .filter(certificate -> certificate.getGiftCertificateId() > 1)
                                 .sorted(Comparator.comparing(GiftCertificate::getName))
-                                .toList(), List.of("paper", "%e%")),
-                arguments(SelectQueryWithParameterSql.QUERY_WITH_PARAMS_4,
+                                .toList()),
+                arguments(new SelectQueryParameter("paper", "e", "two", null, DESC),
+                        createAllCertificateList().stream()
+                                .filter(certificate -> certificate.getGiftCertificateId() > 1)
+                                .sorted(Comparator.comparing(GiftCertificate::getCreateDate).reversed())
+                                .toList()),
+                arguments(new SelectQueryParameter("paper", "e", null, null, null),
+                        createAllCertificateList().stream()
+                                .filter(certificate -> certificate.getGiftCertificateId() > 1)
+                                .sorted(Comparator.comparing(GiftCertificate::getName))
+                                .toList()),
+                arguments(new SelectQueryParameter(null, "e", null, ASC, ASC),
                         createAllCertificateList().stream()
                                 .filter(certificate -> certificate.getGiftCertificateId() > 1)
                                 .sorted(Comparator.comparing(GiftCertificate::getName).thenComparing(GiftCertificate::getCreateDate))
-                                .toList(), List.of("%e%"))
+                                .toList())
+        );
+    }
+
+    Stream<Arguments> updatingDataAndResult() {
+        GiftCertificate notUpdatedCertificate = createAllCertificateList().get(0);
+
+        return Stream.of(
+                arguments(new GiftCertificate.GiftCertificateBuilder()
+                                .setGiftCertificateId(1)
+                                .setName("   ")
+                                .setDescription("   ")
+                                .setPrice(null)
+                                .setDuration(-8)
+                                .createGiftCertificate(), notUpdatedCertificate),
+                arguments(new GiftCertificate.GiftCertificateBuilder()
+                                .setGiftCertificateId(1)
+                                .createGiftCertificate(), notUpdatedCertificate),
+                arguments(new GiftCertificate.GiftCertificateBuilder()
+                                .setGiftCertificateId(1)
+                                .setName("  Milavitsa ")
+                                .setDescription(" Our care for you")
+                                .setPrice(new BigDecimal("15.15"))
+                                .setDuration(10)
+                                .createGiftCertificate(),
+                        new GiftCertificate.GiftCertificateBuilder()
+                                .setGiftCertificateId(1)
+                                .setName("Milavitsa")
+                                .setDescription("Our care for you")
+                                .setPrice(new BigDecimal("15.15"))
+                                .setDuration(10)
+                                .setCreateDate(notUpdatedCertificate.getCreateDate())
+                                .createGiftCertificate()),
+                arguments(new GiftCertificate.GiftCertificateBuilder()
+                                .setGiftCertificateId(1)
+                                .setPrice(new BigDecimal(20))
+                                .setDuration(99)
+                                .createGiftCertificate(),
+                        new GiftCertificate.GiftCertificateBuilder()
+                                .setGiftCertificateId(1)
+                                .setName("Oz.by")
+                                .setDescription("Books, games, stationery")
+                                .setPrice(new BigDecimal("20"))
+                                .setDuration(99)
+                                .setCreateDate(LocalDateTime.of(2022, 4, 11, 13, 48, 14, 0))
+                                .createGiftCertificate())
         );
     }
 }

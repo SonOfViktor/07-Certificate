@@ -3,10 +3,12 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.criteria.CriteriaParameterMaker;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.entity.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,8 +62,13 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public GiftCertificate updateGiftCertificate(GiftCertificate certificate) {
-        return entityManager.merge(certificate);
+    public Optional<GiftCertificate> updateGiftCertificate(GiftCertificate newCertificate) {
+        Optional<GiftCertificate> updatedCertificate =
+                Optional.ofNullable(entityManager.find(GiftCertificate.class, newCertificate.getGiftCertificateId()));
+
+        return updatedCertificate
+                .map(cert -> fillCertificateNewValues(cert, newCertificate))
+                .or(Optional::empty);
     }
 
     @Override
@@ -69,5 +76,26 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
         return entityManager.createQuery(DELETE_GIFT_CERTIFICATE_BY_ID_HQL)
                 .setParameter(ID_PARAMETER, id)
                 .executeUpdate();
+    }
+
+    private GiftCertificate fillCertificateNewValues(GiftCertificate updatedCertificate, GiftCertificate updatingCertificate) {
+        if(StringUtils.isNotBlank(updatingCertificate.getName())) {
+            updatedCertificate.setName(updatingCertificate.getName().trim());
+        }
+        if(StringUtils.isNotBlank(updatingCertificate.getDescription())) {
+            updatedCertificate.setDescription(updatingCertificate.getDescription().trim());
+        }
+        if(updatingCertificate.getPrice() != null) {
+            updatedCertificate.setPrice(updatingCertificate.getPrice());
+        }
+        if(updatingCertificate.getDuration() > 0) {
+            updatedCertificate.setDuration(updatingCertificate.getDuration());
+        }
+        if(!updatingCertificate.getTags().isEmpty()) {
+            updatedCertificate.setTags(updatingCertificate.getTags());
+        }
+        updatedCertificate.setLastUpdateDate(LocalDateTime.now());
+
+        return updatedCertificate;
     }
 }

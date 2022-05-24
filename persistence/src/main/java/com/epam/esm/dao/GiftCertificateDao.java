@@ -44,9 +44,9 @@ public interface GiftCertificateDao {
      * Update gift certificate with specified id.
      *
      * @param certificate the certificate with data for updating old entry in database
-     * @return the int id of updated gift certificate
+     * @return the optional with updated gift certificate if it exists in database or optional empty otherwise
      */
-    GiftCertificate updateGiftCertificate(GiftCertificate certificate);
+    Optional<GiftCertificate> updateGiftCertificate(GiftCertificate certificate);
 
     /**
      * Delete gift certificate with specified id.

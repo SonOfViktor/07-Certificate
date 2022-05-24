@@ -2,13 +2,21 @@ package com.epam.esm.entity;
 
 import com.epam.esm.validategroup.ForCreate;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+@Table(name = "gift_certificate", schema = "module_two")
+@Entity
 public class GiftCertificate {
     private static final String DATE_JSON_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int giftCertificateId;
 
     @NotNull(groups = ForCreate.class)
@@ -28,10 +36,18 @@ public class GiftCertificate {
     private int duration;
 
     @Null
+    @Column(insertable = false)
     private LocalDateTime createDate;
 
     @Null
+    @Column(insertable = false)
     private LocalDateTime lastUpdateDate;
+
+    @ManyToMany
+    @JoinTable(name = "gift_certificate_tag", schema = "module_two",
+            joinColumns = @JoinColumn(name = "gct_gift_certificate_id"),
+            inverseJoinColumns = @JoinColumn(name = "gct_tag_id"))
+    private List<Tag> tags = new ArrayList<>();
 
     public GiftCertificate() {
     }
@@ -104,6 +120,14 @@ public class GiftCertificate {
         this.lastUpdateDate = lastUpdateDate;
     }
 
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -170,6 +194,11 @@ public class GiftCertificate {
 
         public GiftCertificateBuilder setLastUpdateDate(LocalDateTime updateDateTime) {
             giftCertificate.setLastUpdateDate(updateDateTime);
+            return this;
+        }
+
+        public GiftCertificateBuilder setTags(List<Tag> tags) {
+            giftCertificate.setTags(tags);
             return this;
         }
 

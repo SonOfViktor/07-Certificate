@@ -2,8 +2,8 @@ package com.epam.esm.dao;
 
 import com.epam.esm.entity.Tag;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * The interface provided methods to control data in database table related with tags.
@@ -21,24 +21,24 @@ public interface TagDao {
      * Add specified tags to database.
      *
      * @param tags the set with tags to add
-     * @return the int array where element 1 if the entry was added 0 otherwise
+     * @return the long that shows how many tags was added in table
      */
-    int[] addTags(Set<Tag> tags);
+    long addTags(List<Tag> tags);
 
     /**
      * Read all tag from database.
      *
-     * @return the set with all tags in database
+     * @return the list with all tags in database
      */
-    Set<Tag> readAllTag();
+    List<Tag> readAllTag();
 
     /**
      * Read all tag related with specified gift certificate.
      *
      * @param certificateId the gift certificate id
-     * @return the set tags related with specified gift certificate
+     * @return the list tags related with specified gift certificate
      */
-    Set<Tag> readAllTagByCertificateId(int certificateId);
+    List<Tag> readAllTagByCertificateId(int certificateId);
 
     /**
      * Read specified tag in database.
