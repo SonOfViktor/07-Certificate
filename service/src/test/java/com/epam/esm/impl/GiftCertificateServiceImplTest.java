@@ -1,7 +1,5 @@
 package com.epam.esm.impl;
 
-import com.epam.esm.builder.SelectSqlBuilder;
-import com.epam.esm.constant.SelectQuerySql;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.SelectQueryParameter;
@@ -13,7 +11,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
@@ -22,7 +19,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -36,9 +32,6 @@ class GiftCertificateServiceImplTest {
 
     @Mock
     private GiftCertificateDao giftCertificateDao;
-
-    @Spy
-    private SelectSqlBuilder builder;
 
     @BeforeAll
     void beforeAll() {
@@ -63,39 +56,37 @@ class GiftCertificateServiceImplTest {
 
     @Test
     void testFindCertificatesWithParams() {
-        SelectQueryParameter parameter =  new SelectQueryParameter("food", "e",
+        SelectQueryParameter params =  new SelectQueryParameter("food", "e",
                 "e", null, null);
 
-        when(giftCertificateDao
-                .readGiftCertificateWithParam(eq(SelectQuerySql.QUERY_WITHOUT_ORDER), eq(List.of("food", "%e%", "%e%"))))
+        when(giftCertificateDao.readGiftCertificateWithParam(params))
                 .thenReturn(certificateList);
 
-        List<GiftCertificate> actual = giftCertificateService.findCertificatesWithParams(parameter);
+        List<GiftCertificate> actual = giftCertificateService.findCertificatesWithParams(params);
 
         assertEquals(certificateList, actual);
     }
 
     @Test
     void testFindCertificatesWithNullParams() {
-        when(giftCertificateDao
-                .readGiftCertificateWithParam(eq(SelectQuerySql.QUERY_WITHOUT_PARAMETERS), eq(List.of())))
+        SelectQueryParameter params = new SelectQueryParameter(null, null, null, null, null);
+
+        when(giftCertificateDao.readGiftCertificateWithParam(params))
                 .thenReturn(certificateList);
 
-        List<GiftCertificate> actual = giftCertificateService
-                .findCertificatesWithParams(new SelectQueryParameter(null, null, null, null, null));
+        List<GiftCertificate> actual = giftCertificateService.findCertificatesWithParams(params);
 
         assertEquals(certificateList, actual);
     }
 
     @Test
     void testNotFindCertificatesWithParams() {
-        SelectQueryParameter selectQueryParameter = new SelectQueryParameter(null,null, null, null, null);
-        when(giftCertificateDao
-                .readGiftCertificateWithParam(eq(SelectQuerySql.QUERY_WITHOUT_PARAMETERS), eq(List.of())))
+        SelectQueryParameter params = new SelectQueryParameter(null,null, null, null, null);
+        when(giftCertificateDao.readGiftCertificateWithParam(params))
                 .thenReturn(List.of());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> giftCertificateService.findCertificatesWithParams(selectQueryParameter));
+                () -> giftCertificateService.findCertificatesWithParams(params));
     }
 
     @Test
@@ -118,17 +109,17 @@ class GiftCertificateServiceImplTest {
     @Test
     void testUpdateGiftCertificate() {
         GiftCertificate certificate = certificateList.get(0);
-        when(giftCertificateDao.updateGiftCertificate(certificate)).thenReturn(1);
+        when(giftCertificateDao.updateGiftCertificate(certificate)).thenReturn(Optional.of(certificate));
 
-        int actual = giftCertificateService.updateGiftCertificate(certificate, 1);
+        GiftCertificate actual = giftCertificateService.updateGiftCertificate(certificate, 1);
 
-        assertEquals(1, actual);
+        assertEquals(certificate, actual);
     }
 
     @Test
     void testUpdateNotExistGiftCertificate() {
         GiftCertificate certificate = certificateList.get(0);
-        when(giftCertificateDao.updateGiftCertificate(certificate)).thenReturn(0);
+        when(giftCertificateDao.updateGiftCertificate(certificate)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> giftCertificateService.updateGiftCertificate(certificate, 1));

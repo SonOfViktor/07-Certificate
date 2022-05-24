@@ -51,7 +51,7 @@ public interface GiftCertificateService {
      * @return 1 if specified gift certificate was deleted
      * @throws ResourceNotFoundException if gift certificate wasn't found
      */
-    int updateGiftCertificate(GiftCertificate certificate, int id);
+    GiftCertificate updateGiftCertificate(GiftCertificate certificate, int id);
 
     /**
      * Delete gift certificate with specified id.

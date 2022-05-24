@@ -12,8 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class TagServiceImplTest {
-    Set<Tag> tagSet;
+    List<Tag> tags;
 
     @InjectMocks
     TagServiceImpl tagService;
@@ -32,7 +32,7 @@ class TagServiceImplTest {
 
     @BeforeAll
     void beforeAll() {
-        tagSet = Set.of(new Tag(1, "food"), new Tag("summer"));
+        tags = List.of(new Tag(1, "food"), new Tag("summer"));
     }
 
     @Test
@@ -55,36 +55,36 @@ class TagServiceImplTest {
 
     @Test
     void testAddTags() {
-        when(tagDao.addTags(tagSet)).thenReturn(new int[]{0, 1});
+        when(tagDao.addTags(tags)).thenReturn(1L);
 
-        int[] actual = tagService.addTags(tagSet);
+        long actual = tagService.addTags(tags);
 
-        assertArrayEquals(new int[]{0, 1}, actual);
+        assertEquals(1, actual);
     }
 
     @Test
     void testAddNullTags() {
-        int[] actual = tagService.addTags(null);
+        long actual = tagService.addTags(null);
 
-        assertArrayEquals(new int[0], actual);
+        assertEquals(0, actual);
     }
 
     @Test
     void testFindAllTags() {
-        when(tagDao.readAllTag()).thenReturn(tagSet);
+        when(tagDao.readAllTag()).thenReturn(tags);
 
-        Set<Tag> actual = tagService.findAllTags();
+        List<Tag> actual = tagService.findAllTags();
 
-        assertEquals(tagSet, actual);
+        assertEquals(tags, actual);
     }
 
     @Test
     void testFindTagsByCertificateId() {
-        when(tagDao.readAllTagByCertificateId(1)).thenReturn(tagSet);
+        when(tagDao.readAllTagByCertificateId(1)).thenReturn(tags);
 
-        Set<Tag> actual = tagService.findTagsByCertificateId(1);
+        List<Tag> actual = tagService.findTagsByCertificateId(1);
 
-        assertEquals(tagSet, actual);
+        assertEquals(tags, actual);
     }
 
     @Test

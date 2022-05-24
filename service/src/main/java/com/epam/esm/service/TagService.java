@@ -2,8 +2,7 @@ package com.epam.esm.service;
 
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
-
-import java.util.Set;
+import java.util.List;
 
 /**
  * The interface provide methods to control business logic related with tags
@@ -20,25 +19,25 @@ public interface TagService {
     /**
      * Add specified tags.
      *
-     * @param tags set with tags to add
-     * @return the int array where element 1 if the tag was added 0 otherwise
+     * @param tags list with tags to add
+     * @return the long that shows how much element was added
      */
-    int[] addTags(Set<Tag> tags);
+    long addTags(List<Tag> tags);
 
     /**
      * Find all tags.
      *
-     * @return the set with all tags
+     * @return the list with all tags
      */
-    Set<Tag> findAllTags();
+    List<Tag> findAllTags();
 
     /**
      * Find tags related with specified gift certificate id.
      *
      * @param certificateId the gift certificate id
-     * @return the set with tags related with specified gift certificate id
+     * @return the list with tags related with specified gift certificate id
      */
-    Set<Tag> findTagsByCertificateId(int certificateId);
+    List<Tag> findTagsByCertificateId(int certificateId);
 
     /**
      * Find tag with specified id.

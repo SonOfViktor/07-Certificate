@@ -6,9 +6,8 @@ import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class TagServiceImpl implements TagService {
@@ -31,19 +30,17 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public int[] addTags(Set<Tag> tags) {
-        int[] affectedRow = (tags != null) ? tagDao.addTags(tags) : new int[0];
-
-        return affectedRow;
+    public long addTags(List<Tag> tags) {
+        return (tags != null) ? tagDao.addTags(tags) : 0L;
     }
 
     @Override
-    public Set<Tag> findAllTags() {
+    public List<Tag> findAllTags() {
         return tagDao.readAllTag();
     }
 
     @Override
-    public Set<Tag> findTagsByCertificateId(int certificateId) {
+    public List<Tag> findTagsByCertificateId(int certificateId) {
         return tagDao.readAllTagByCertificateId(certificateId);
     }
 
