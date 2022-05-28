@@ -6,12 +6,13 @@ import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.*;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class TagServiceImpl implements TagService {
-    private TagDao tagDao;
+    private final TagDao tagDao;
 
     @Autowired
     public TagServiceImpl(TagDao tagDao) {
@@ -19,19 +20,13 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public int addTag(Tag tag) {
-        int tagId = tagDao.createTag(tag);
-
-        if (tagId == 0) {
-            throw new ResourceNotFoundException("Tag with name " + tag.getName() + " has already existed");
-        }
-
-        return tagId;
+    public Tag addTag(Tag tag) {
+        return tagDao.createTag(tag);
     }
 
     @Override
-    public long addTags(List<Tag> tags) {
-        return (tags != null) ? tagDao.addTags(tags) : 0L;
+    public Set<Tag> addTags(Set<Tag> tags) {
+        return (tags != null) ? tagDao.addTags(tags) : Collections.emptySet();
     }
 
     @Override
@@ -40,7 +35,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<Tag> findTagsByCertificateId(int certificateId) {
+    public Set<Tag> findTagsByCertificateId(int certificateId) {
         return tagDao.readAllTagByCertificateId(certificateId);
     }
 

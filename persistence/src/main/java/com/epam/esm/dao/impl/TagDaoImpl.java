@@ -5,8 +5,8 @@ import com.epam.esm.entity.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class TagDaoImpl implements TagDao {
@@ -30,19 +30,18 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public int createTag(Tag tag) {
+    public Tag createTag(Tag tag) {
         readTagByName(tag.getName())
-                .ifPresentOrElse(t -> {}, () -> entityManager.persist(tag));
+                .ifPresentOrElse(t -> tag.setTagId(t.getTagId()), () -> entityManager.persist(tag));
 
-        return tag.getTagId();
+        return tag;
     }
 
     @Override
-    public long addTags(List<Tag> tags) {
+    public Set<Tag> addTags(Set<Tag> tags) {
         return tags.stream()
                 .map(this::createTag)
-                .filter(id -> id != 0)
-                .count();
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -51,10 +50,12 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public List<Tag> readAllTagByCertificateId(int certificateId) {
-        return entityManager.createQuery(SELECT_TAGS_BY_GIFT_CERTIFICATE_ID_HQL, Tag.class)
+    public Set<Tag> readAllTagByCertificateId(int certificateId) {
+        List<Tag> tags = entityManager.createQuery(SELECT_TAGS_BY_GIFT_CERTIFICATE_ID_HQL, Tag.class)
                 .setParameter(ID, certificateId)
                 .getResultList();
+
+        return new HashSet<>(tags);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.epam.esm.impl;
 
+import com.epam.esm.ServiceApplication;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.SelectQueryParameter;
@@ -13,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +25,8 @@ import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest
+@SpringBootTest(classes = ServiceApplication.class)
+@ActiveProfiles("test")
 class GiftCertificateServiceImplTest {
     private List<GiftCertificate> certificateList;
 
@@ -40,10 +43,11 @@ class GiftCertificateServiceImplTest {
 
     @Test
     void testAddGiftCertificate() {
-        when(giftCertificateDao.createGiftCertificate(new GiftCertificate())).thenReturn(1);
-        int actual = giftCertificateService.addGiftCertificate(new GiftCertificate());
+        GiftCertificate expected = new GiftCertificate();
+        when(giftCertificateDao.createGiftCertificate(new GiftCertificate())).thenReturn(expected);
+        GiftCertificate actual = giftCertificateService.addGiftCertificate(expected);
 
-        assertEquals(1, actual);
+        assertEquals(expected, actual);
     }
 
     @Test

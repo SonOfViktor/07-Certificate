@@ -13,13 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@SpringBootTest
 @ActiveProfiles("test")
 @Transactional
 class TagDaoImplTest {
@@ -44,30 +45,36 @@ class TagDaoImplTest {
     @Test
     void testCreateTag() {
         Tag tag = new Tag("piece");
-        int actual = tagDao.createTag(tag);
+        int actual = tagDao.createTag(tag).getTagId();
         assertEquals(7, actual);
     }
 
     @Test
     void testCreateTagSameName() {
         Tag tag = new Tag("food");
-        int actual = tagDao.createTag(tag);
-        assertEquals(0, actual);
+        int actual = tagDao.createTag(tag).getTagId();
+        assertEquals(1, actual);
     }
 
     @Order(1)
     @Test
     void addTags() {
-        List<Tag> tags = List.of(new Tag("food"), new Tag("business"), new Tag("shopping"));
-        long actual = tagDao.addTags(tags);
-        assertEquals(2, actual);
+        Set<Tag> tags = Set.of(new Tag("food"), new Tag("business"), new Tag("shopping"));
+
+        int[] expected = new int[]{1, 8, 9};
+        int[] actual = tagDao.addTags(tags).stream().map(Tag::getTagId).mapToInt(id -> id).toArray();
+
+        assertThat(actual).contains(expected);
     }
 
     @Test
     void addAllExistTags() {
-        List<Tag> tags = List.of(new Tag("food"), new Tag("shoe"), new Tag("paper"));
-        long actual = tagDao.addTags(tags);
-        assertEquals(0, actual);
+        Set<Tag> tags = Set.of(new Tag("food"), new Tag("shoe"), new Tag("paper"));
+
+        int[] expected = new int[]{1, 5, 3};
+        int[] actual = tagDao.addTags(tags).stream().map(Tag::getTagId).mapToInt(id -> id).toArray();
+
+        assertThat(actual).contains(expected);
     }
 
     @Test
@@ -81,15 +88,15 @@ class TagDaoImplTest {
 
     @Test
     void testReadAllTagByCertificateId() {
-        List<Tag> expected = List.of(new Tag(1,"food"), new Tag(2,"stationery"),
+        Set<Tag> expected = Set.of(new Tag(1,"food"), new Tag(2,"stationery"),
                 new Tag(5,"paper"), new Tag(6,"by"));
-        List<Tag> actual = tagDao.readAllTagByCertificateId(3);
+        Set<Tag> actual = tagDao.readAllTagByCertificateId(3);
         assertEquals(expected, actual);
     }
 
     @Test
     void testReadAllTagByNonexistentCertificateId() {
-        List<Tag> actual = tagDao.readAllTagByCertificateId(22);
+        Set<Tag> actual = tagDao.readAllTagByCertificateId(22);
         assertTrue(actual.isEmpty());
     }
 

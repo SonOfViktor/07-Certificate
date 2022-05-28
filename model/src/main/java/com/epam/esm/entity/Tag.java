@@ -1,5 +1,6 @@
 package com.epam.esm.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -49,10 +50,12 @@ public class Tag {
         this.name = name;
     }
 
+    @JsonIgnore
     public List<GiftCertificate> getGiftCertificates() {
         return giftCertificates;
     }
 
+    @JsonIgnore
     public void setGiftCertificates(List<GiftCertificate> giftCertificates) {
         this.giftCertificates = giftCertificates;
     }

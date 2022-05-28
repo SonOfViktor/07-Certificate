@@ -18,8 +18,8 @@ import java.util.List;
 @RequestMapping("/certificates")
 @Validated
 public class GiftCertificateController {
-    private GiftCertificateTagDtoService certificateTagService;
-    private GiftCertificateService certificateService;
+    private final GiftCertificateTagDtoService certificateTagService;
+    private final GiftCertificateService certificateService;
 
     @Autowired
     public GiftCertificateController(GiftCertificateTagDtoService certificateTagService,
@@ -45,14 +45,16 @@ public class GiftCertificateController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public int addCertificate(@Validated({ForCreate.class, Default.class}) @RequestBody CertificateTagsDto certificateTagsDto) {
+    public CertificateTagsDto addCertificate(@Validated({ForCreate.class, Default.class})
+                                                 @RequestBody CertificateTagsDto certificateTagsDto) {
+
         return certificateTagService.addGiftCertificateTagDto(certificateTagsDto);
     }
 
     @PatchMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateCertificate(@Valid @RequestBody CertificateTagsDto certificateTagDto, @PathVariable @Positive int id) {
-        certificateTagService.updateGiftCertificateTagDto(certificateTagDto, id);
+    @ResponseStatus(HttpStatus.OK)
+    public CertificateTagsDto updateCertificate(@Valid @RequestBody CertificateTagsDto certificateTagDto, @PathVariable @Positive int id) {
+        return certificateTagService.updateGiftCertificateTagDto(certificateTagDto, id);
     }
 
     @DeleteMapping("/{id}")

@@ -10,13 +10,13 @@ import com.epam.esm.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class GiftCertificateTagDtoServiceImpl implements GiftCertificateTagDtoService {
-    private GiftCertificateService giftCertificateService;
-    private TagService tagService;
+    private final GiftCertificateService giftCertificateService;
+    private final TagService tagService;
 
     @Autowired
     public GiftCertificateTagDtoServiceImpl(GiftCertificateService giftCertificateService, TagService tagService) {
@@ -25,21 +25,18 @@ public class GiftCertificateTagDtoServiceImpl implements GiftCertificateTagDtoSe
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public int addGiftCertificateTagDto(CertificateTagsDto certificateTagsDto) {
+    public CertificateTagsDto addGiftCertificateTagDto(CertificateTagsDto certificateTagsDto) {
         GiftCertificate certificate = certificateTagsDto.certificate();
-        List<Tag> tags = certificateTagsDto.tags();
+        Set<Tag> tags = certificateTagsDto.tags();
         certificate.setTags(tags);
 
-        int certificateId = giftCertificateService.addGiftCertificate(certificate);
+        Set<Tag> createdTags = tagService.addTags(tags);
+        GiftCertificate createdCertificate = giftCertificateService.addGiftCertificate(certificate);
 
-        Optional.ofNullable(tags).ifPresent(tagService::addTags);
-
-        return certificateId;
+        return new CertificateTagsDto(createdCertificate, createdTags);
     }
 
     @Override
-    @Transactional
     public List<CertificateTagsDto> findAllGiftCertificateTagDto() {
         List<GiftCertificate> certificates = giftCertificateService.findAllCertificates();
 
@@ -47,7 +44,6 @@ public class GiftCertificateTagDtoServiceImpl implements GiftCertificateTagDtoSe
     }
 
     @Override
-    @Transactional
     public List<CertificateTagsDto> findGiftCertificateTagDtoByParam(SelectQueryParameter params) {
         List<GiftCertificate> certificates = giftCertificateService.findCertificatesWithParams(params);
 
@@ -55,26 +51,25 @@ public class GiftCertificateTagDtoServiceImpl implements GiftCertificateTagDtoSe
     }
 
     @Override
-    @Transactional
     public CertificateTagsDto findGiftCertificateTagDto(int certificateId) {
         GiftCertificate certificate = giftCertificateService.findCertificateById(certificateId);
-        List<Tag> tags = tagService.findTagsByCertificateId(certificateId);
+        Set<Tag> tags = tagService.findTagsByCertificateId(certificateId);
 
         return new CertificateTagsDto(certificate, tags);
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public GiftCertificate updateGiftCertificateTagDto(CertificateTagsDto certificateTagsDto, int id) {
+    public CertificateTagsDto updateGiftCertificateTagDto(CertificateTagsDto certificateTagsDto, int id) {
         GiftCertificate certificate = certificateTagsDto.certificate();
-        List<Tag> tags = certificateTagsDto.tags();
+
+        Set<Tag> tags = tagService.findTagsByCertificateId(id);
+        tags.addAll(certificateTagsDto.tags());
         certificate.setTags(tags);
 
+        Set<Tag> updatedTags = tagService.addTags(tags);
         GiftCertificate updatedCertificate = giftCertificateService.updateGiftCertificate(certificate, id);
 
-        Optional.ofNullable(tags).ifPresent(tagService::addTags);
-
-        return updatedCertificate;
+        return new CertificateTagsDto(updatedCertificate, updatedTags);
     }
 
     private List<CertificateTagsDto> convertCertificateListToCertificateTagsDto(List<GiftCertificate> certificates) {

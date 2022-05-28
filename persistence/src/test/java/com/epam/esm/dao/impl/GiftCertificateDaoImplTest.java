@@ -4,9 +4,8 @@ import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.SelectQueryParameter;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import com.epam.esm.entity.Tag;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -15,16 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.epam.esm.entity.SelectQueryOrder.ASC;
@@ -33,29 +32,35 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
 class GiftCertificateDaoImplTest {
-    public static final String MODULE_TWO_GIFT_CERTIFICATE = "module_two.gift_certificate";
-    private GiftCertificateDao giftCertificateDao;
-    private JdbcTemplate jdbcTemplate;
-    private TagDao tagDao;
+    public static final String GIFT_CERTIFICATE_TABLE = "module_two.gift_certificate";
+    public static final String GIFT_CERTIFICATE_TAG_TABLE = "module_two.gift_certificate_tag";
+    private final GiftCertificateDao giftCertificateDao;
+    private final TagDao tagDao;
+    private final JdbcTemplate jdbcTemplate;
+    private final EntityManager entityManager;
 
     @Autowired
-    public GiftCertificateDaoImplTest(GiftCertificateDao giftCertificateDao, JdbcTemplate jdbcTemplate, TagDao tagDao) {
+    public GiftCertificateDaoImplTest(GiftCertificateDao giftCertificateDao, TagDao tagDao,
+                                      JdbcTemplate jdbcTemplate, EntityManager entityManager) {
         this.giftCertificateDao = giftCertificateDao;
-        this.jdbcTemplate = jdbcTemplate;
         this.tagDao = tagDao;
+        this.jdbcTemplate = jdbcTemplate;
+        this.entityManager = entityManager;
     }
 
     @Test
     void testTableRowQuantity() {
-        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_GIFT_CERTIFICATE);
+        int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, GIFT_CERTIFICATE_TABLE);
         int expected = 4;
         assertEquals(expected, actual);
     }
 
+    @Order(0)
     @Test
     void testCreateGiftCertificate() {
         GiftCertificate certificate = new GiftCertificate.GiftCertificateBuilder()
@@ -64,9 +69,37 @@ class GiftCertificateDaoImplTest {
                 .setPrice(new BigDecimal(60))
                 .setDuration(30)
                 .createGiftCertificate();
-        int actualId = giftCertificateDao.createGiftCertificate(certificate);
+
+        int actualId = giftCertificateDao.createGiftCertificate(certificate).getGiftCertificateId();
         int expectedId = 5;
+
         assertEquals(expectedId, actualId);
+    }
+
+    @Order(1)
+    @Test
+    @Disabled("insert tag impact TagDaoImplTest")
+    void testCreateGiftCertificateWithTags() {
+        Set<Tag> tags = Set.of(new Tag("name"), new Tag("food"));
+        tagDao.addTags(tags);
+        GiftCertificate certificate = new GiftCertificate.GiftCertificateBuilder()
+                .setName("Ganna")
+                .setDescription("Хозяйки нам доверяют")
+                .setPrice(new BigDecimal(60))
+                .setDuration(30)
+                .setTags(tags)
+                .createGiftCertificate();
+
+        int actualId = giftCertificateDao.createGiftCertificate(certificate).getGiftCertificateId();
+        int expectedId = 6;
+
+        entityManager.flush();
+
+        int actualTableRows = JdbcTestUtils.countRowsInTable(jdbcTemplate, GIFT_CERTIFICATE_TAG_TABLE);
+        int expectedTableRows = 16;
+
+        assertEquals(expectedId, actualId);
+        assertEquals(expectedTableRows, actualTableRows);
     }
 
     @Test
@@ -107,6 +140,27 @@ class GiftCertificateDaoImplTest {
     }
 
     @Test
+    @Disabled("insert tag impact TagDaoImplTest")
+    void testUpdateGiftCertificateWithTags() {
+        Tag newTag = new Tag("name");
+        tagDao.createTag(newTag);
+        GiftCertificate certificate = new GiftCertificate.GiftCertificateBuilder()
+                .setGiftCertificateId(1)
+                .setTags(new HashSet<>(tagDao.readAllTagByCertificateId(1)))
+                .createGiftCertificate();
+        certificate.getTags().add(newTag);
+
+        giftCertificateDao.updateGiftCertificate(certificate).get();
+
+        entityManager.flush();
+
+        int actualTableRows = JdbcTestUtils.countRowsInTable(jdbcTemplate, GIFT_CERTIFICATE_TAG_TABLE);
+        int expectedTableRows = 15;
+
+        assertEquals(expectedTableRows, actualTableRows);
+    }
+
+    @Test
     void testUpdateNonExistentGiftCertificate() {
         GiftCertificate replaceCertificate = new GiftCertificate.GiftCertificateBuilder()
                 .setGiftCertificateId(6)
@@ -122,7 +176,7 @@ class GiftCertificateDaoImplTest {
         int expectedCountRow = 3;
 
         int actualAffectedRow = giftCertificateDao.deleteGiftCertificate(3);
-        int actualCountRow = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_GIFT_CERTIFICATE);
+        int actualCountRow = JdbcTestUtils.countRowsInTable(jdbcTemplate, GIFT_CERTIFICATE_TABLE);
 
         assertEquals(expectedAffectedRow, actualAffectedRow);
         assertEquals(expectedCountRow, actualCountRow);
@@ -134,7 +188,7 @@ class GiftCertificateDaoImplTest {
         int expectedCountRow = 4;
 
         int actualAffectedRow = giftCertificateDao.deleteGiftCertificate(6);
-        int actualCountRow = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_GIFT_CERTIFICATE);
+        int actualCountRow = JdbcTestUtils.countRowsInTable(jdbcTemplate, GIFT_CERTIFICATE_TABLE);
 
         assertEquals(expectedAffectedRow, actualAffectedRow);
         assertEquals(expectedCountRow, actualCountRow);

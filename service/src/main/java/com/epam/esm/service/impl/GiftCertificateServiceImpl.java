@@ -7,12 +7,15 @@ import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.GiftCertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class GiftCertificateServiceImpl implements GiftCertificateService {
-    private GiftCertificateDao giftCertificateDao;
+    private final GiftCertificateDao giftCertificateDao;
 
     @Autowired
     public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao) {
@@ -20,7 +23,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public int addGiftCertificate(GiftCertificate certificate) {
+    public GiftCertificate addGiftCertificate(GiftCertificate certificate) {
         return giftCertificateDao.createGiftCertificate(certificate);
     }
 

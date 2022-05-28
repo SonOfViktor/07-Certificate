@@ -8,8 +8,8 @@ CREATE SCHEMA module_two;
     `description` VARCHAR(500) NULL,
     `price` DECIMAL(6,2) NOT NULL DEFAULT 0,
     `duration` INT NOT NULL,
-    `create_date` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `last_update_date` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `create_date` TIMESTAMP(3) NOT NULL ,
+    `last_update_date` TIMESTAMP(3) NOT NULL,
     PRIMARY KEY (`gift_certificate_id`));
   --  ENGINE = InnoDB;
 

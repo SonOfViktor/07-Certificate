@@ -1,7 +1,6 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.CertificateTagsDto;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.SelectQueryParameter;
 import com.epam.esm.exception.ResourceNotFoundException;
 
@@ -15,9 +14,9 @@ public interface GiftCertificateTagDtoService {
      * Add specified gift certificate with tags.
      *
      * @param certificateTagsDto the certificate tags dto
-     * @return generated id for added certificate
+     * @return the certificate tag dto with generated id for certificate and tags by database
      */
-    int addGiftCertificateTagDto(CertificateTagsDto certificateTagsDto);
+    CertificateTagsDto addGiftCertificateTagDto(CertificateTagsDto certificateTagsDto);
 
     /**
      * Find all gift certificate with tags.
@@ -49,8 +48,8 @@ public interface GiftCertificateTagDtoService {
      *
      * @param certificateTagsDto certificate with tags
      * @param id                 the gift certificate id
-     * @return the int array where element 1 if the entry was added 0 otherwise
+     * @return the updated GiftSertificateTagDto object
      * @throws ResourceNotFoundException if gift certificate with specified id wasn't found
      */
-    GiftCertificate updateGiftCertificateTagDto(CertificateTagsDto certificateTagsDto, int id);
+    CertificateTagsDto updateGiftCertificateTagDto(CertificateTagsDto certificateTagsDto, int id);
 }

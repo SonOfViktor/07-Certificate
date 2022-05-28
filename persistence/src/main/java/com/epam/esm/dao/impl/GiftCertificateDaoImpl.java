@@ -29,9 +29,14 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public int createGiftCertificate(GiftCertificate certificate) {
+    public GiftCertificate createGiftCertificate(GiftCertificate certificate) {
+        LocalDateTime createTime = LocalDateTime.now();
+        certificate.setCreateDate(createTime);
+        certificate.setLastUpdateDate(createTime);
+
         entityManager.persist(certificate);
-        return certificate.getGiftCertificateId();
+
+        return certificate;
     }
 
     @Override

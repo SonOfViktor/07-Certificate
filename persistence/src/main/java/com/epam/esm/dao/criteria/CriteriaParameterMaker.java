@@ -19,7 +19,7 @@ public class CriteriaParameterMaker {
         List<Predicate> predicates = new ArrayList<>();
 
         if (!isBlank(params.tagName())) {
-            ListJoin<GiftCertificate, Tag> tag = root.join(GiftCertificate_.tags);
+            SetJoin<GiftCertificate, Tag> tag = root.join(GiftCertificate_.tags);
             predicates.add(
                     criteriaBuilder.equal(
                             criteriaBuilder.lower(tag.get(Tag_.name)),

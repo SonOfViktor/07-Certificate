@@ -13,9 +13,9 @@ public interface GiftCertificateDao {
      * Add gift certificate to database.
      *
      * @param certificate the certificate to add
-     * @return generated int id of added certificate
+     * @return the gift certificate with generated id by database
      */
-    int createGiftCertificate(GiftCertificate certificate);
+    GiftCertificate createGiftCertificate(GiftCertificate certificate);
 
     /**
      * Read all certificate from database.
