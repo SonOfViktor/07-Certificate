@@ -50,6 +50,13 @@ public interface TagService {
     Tag findTagById(int tagId);
 
     /**
+     * Read the most widely used tag of a user with the highest cost of all orders
+     *
+     * @return list of most widely used tag with the highest cost
+     */
+    List<Tag> findMostPopularHighestPriceTag();
+
+    /**
      * Delete tag with specified id.
      *
      * @param tagId the tag id
