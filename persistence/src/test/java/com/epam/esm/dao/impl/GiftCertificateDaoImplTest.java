@@ -14,11 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
-import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
@@ -37,8 +35,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 @ActiveProfiles("test")
 @Transactional
 class GiftCertificateDaoImplTest {
-    public static final String GIFT_CERTIFICATE_TABLE = "module_two.gift_certificate";
-    public static final String GIFT_CERTIFICATE_TAG_TABLE = "module_two.gift_certificate_tag";
+    public static final String GIFT_CERTIFICATE_TABLE = "module_3.gift_certificates";
+    public static final String GIFT_CERTIFICATE_TAG_TABLE = "module_3.gift_certificate_tag";
     private final GiftCertificateDao giftCertificateDao;
     private final TagDao tagDao;
     private final JdbcTemplate jdbcTemplate;

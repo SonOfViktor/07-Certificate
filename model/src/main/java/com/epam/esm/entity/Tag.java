@@ -8,11 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Table(name = "tag", schema = "module_two")
+@Table(name = "tags", schema = "module_3")
 @Entity
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int tagId;
 
     @NotNull

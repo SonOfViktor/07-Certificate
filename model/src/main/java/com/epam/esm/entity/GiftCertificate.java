@@ -11,13 +11,14 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-@Table(name = "gift_certificate", schema = "module_two")
+@Table(name = "gift_certificates", schema = "module_3")
 @Entity
 public class GiftCertificate {
     private static final String DATE_JSON_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int giftCertificateId;
 
     @NotNull(groups = ForCreate.class)
@@ -41,10 +42,13 @@ public class GiftCertificate {
     private LocalDateTime lastUpdateDate;
 
     @ManyToMany
-    @JoinTable(name = "gift_certificate_tag", schema = "module_two",
-            joinColumns = @JoinColumn(name = "gct_gift_certificate_id"),
-            inverseJoinColumns = @JoinColumn(name = "gct_tag_id"))
+    @JoinTable(name = "gift_certificate_tag", schema = "module_3",
+            joinColumns = @JoinColumn(name = "gift_certificate_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
+
+    @OneToMany(mappedBy = "giftCertificate")
+    private List<UserOrder> userOrders;
 
     public GiftCertificate() {
     }
@@ -125,6 +129,16 @@ public class GiftCertificate {
     @JsonIgnore
     public void setTags(Set<Tag> tags) {
         this.tags = tags;
+    }
+
+    @JsonIgnore
+    public List<UserOrder> getUserOrders() {
+        return userOrders;
+    }
+
+    @JsonIgnore
+    public void setUserOrders(List<UserOrder> userOrders) {
+        this.userOrders = userOrders;
     }
 
     @Override
