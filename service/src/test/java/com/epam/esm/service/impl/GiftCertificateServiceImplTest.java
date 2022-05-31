@@ -52,7 +52,7 @@ class GiftCertificateServiceImplTest {
 
     @Test
     void testFindCertificatesWithParams() {
-        SelectQueryParameter params =  new SelectQueryParameter("food", "e",
+        SelectQueryParameter params =  new SelectQueryParameter(List.of("food"), "e",
                 "e", null, null);
 
         when(giftCertificateDao.readGiftCertificateWithParam(params))

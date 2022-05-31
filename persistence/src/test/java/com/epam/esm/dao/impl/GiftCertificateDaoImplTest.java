@@ -76,7 +76,6 @@ class GiftCertificateDaoImplTest {
 
     @Order(1)
     @Test
-    @Disabled("insert tag impact TagDaoImplTest")
     void testCreateGiftCertificateWithTags() {
         Set<Tag> tags = Set.of(new Tag("name"), new Tag("food"));
         tagDao.addTags(tags);
@@ -138,7 +137,6 @@ class GiftCertificateDaoImplTest {
     }
 
     @Test
-    @Disabled("insert tag impact TagDaoImplTest")
     void testUpdateGiftCertificateWithTags() {
         Tag newTag = new Tag("name");
         tagDao.createTag(newTag);
@@ -230,22 +228,32 @@ class GiftCertificateDaoImplTest {
 
     Stream<Arguments> stringQueryAndResult() {
         return Stream.of(
-                arguments(new SelectQueryParameter("paper", "e", "two", ASC, null),
+                arguments(new SelectQueryParameter(List.of("paper"), "e", "two", ASC, null),
                         createAllCertificateList().stream()
                                 .filter(certificate -> certificate.getGiftCertificateId() > 1)
                                 .sorted(Comparator.comparing(GiftCertificate::getName))
                                 .toList()),
-                arguments(new SelectQueryParameter("paper", "e", "two", null, DESC),
+                arguments(new SelectQueryParameter(List.of("paper"), "e", "two", null, DESC),
                         createAllCertificateList().stream()
                                 .filter(certificate -> certificate.getGiftCertificateId() > 1)
                                 .sorted(Comparator.comparing(GiftCertificate::getCreateDate).reversed())
                                 .toList()),
-                arguments(new SelectQueryParameter("paper", "e", null, null, null),
+                arguments(new SelectQueryParameter(List.of("paper", "stationery", "by"), "e", null, null, DESC),
+                        createAllCertificateList().stream()
+                                .filter(certificate -> certificate.getGiftCertificateId() > 2)
+                                .sorted(Comparator.comparing(GiftCertificate::getCreateDate).reversed())
+                                .toList()),
+                arguments(new SelectQueryParameter(List.of("paper"), "e", null, null, null),
                         createAllCertificateList().stream()
                                 .filter(certificate -> certificate.getGiftCertificateId() > 1)
                                 .sorted(Comparator.comparing(GiftCertificate::getName))
                                 .toList()),
                 arguments(new SelectQueryParameter(null, "e", null, ASC, ASC),
+                        createAllCertificateList().stream()
+                                .filter(certificate -> certificate.getGiftCertificateId() > 1)
+                                .sorted(Comparator.comparing(GiftCertificate::getName).thenComparing(GiftCertificate::getCreateDate))
+                                .toList()),
+                arguments(new SelectQueryParameter(Collections.emptyList(), "e", null, ASC, ASC),
                         createAllCertificateList().stream()
                                 .filter(certificate -> certificate.getGiftCertificateId() > 1)
                                 .sorted(Comparator.comparing(GiftCertificate::getName).thenComparing(GiftCertificate::getCreateDate))
