@@ -23,7 +23,7 @@ public class User {
     private String lastName;
 
     @OneToMany(mappedBy = "user")
-    private List<UserOrder> orders;
+    private List<Payment> payments;
 
     public User(int userId, String firstName, String lastName) {
         this.userId = userId;
@@ -44,6 +44,10 @@ public class User {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public List<Payment> getPayments() {
+        return payments;
     }
 
     @Override

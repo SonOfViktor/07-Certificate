@@ -48,9 +48,23 @@ CREATE TABLE IF NOT EXISTS `module_3`.`gift_certificate_tag`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `module_3`.`users`
 (
-    `id`         SERIAL PRIMARY KEY,
+    `id`         INT         NOT NULL AUTO_INCREMENT,
     `first_name` VARCHAR(50) NOT NULL,
-    `last_name`  VARCHAR(50) NOT NULL
+    `last_name`  VARCHAR(50) NOT NULL,
+    PRIMARY KEY (`id`)
+);
+
+-- -----------------------------------------------------
+-- Table `module_3`.`payments`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `module_3`.`payments`
+(
+    `id`           INT          NOT NULL AUTO_INCREMENT,
+    `user_id`      INT          NOT NULL REFERENCES `module_3`.`users` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    `created_date` TIMESTAMP(3) NOT NULL,
+    PRIMARY KEY (`id`)
 );
 
 -- -----------------------------------------------------
@@ -58,12 +72,13 @@ CREATE TABLE IF NOT EXISTS `module_3`.`users`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `module_3`.`orders`
 (
-    `id`                  SERIAL PRIMARY KEY,
-    `cost`                NUMERIC(5, 2) NOT NULL CHECK ( `cost` > 0 ),
-    `created_date`        TIMESTAMP(3)  NOT NULL,
-    `user_id`             INT           NOT NULL REFERENCES module_3.users (`id`)
+    `id`                  INT           NOT NULL AUTO_INCREMENT,
+    `cost`                NUMERIC(5, 2) NOT NULL CHECK (`cost` > 0),
+    `gift_certificate_id` INT           REFERENCES `module_3`.`gift_certificates` (`id`)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+    `payment_id`          INT           NOT NULL REFERENCES `module_3`.`payments` (`id`)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    `gift_certificate_id` INT REFERENCES `module_3`.`gift_certificates` (`id`)
-        ON DELETE RESTRICT
+    PRIMARY KEY (`id`)
 );

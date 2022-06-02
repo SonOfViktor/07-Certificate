@@ -93,7 +93,7 @@ class GiftCertificateDaoImplTest {
         entityManager.flush();
 
         int actualTableRows = JdbcTestUtils.countRowsInTable(jdbcTemplate, GIFT_CERTIFICATE_TAG_TABLE);
-        int expectedTableRows = 16;
+        int expectedTableRows = 15;
 
         assertEquals(expectedId, actualId);
         assertEquals(expectedTableRows, actualTableRows);
@@ -151,7 +151,7 @@ class GiftCertificateDaoImplTest {
         entityManager.flush();
 
         int actualTableRows = JdbcTestUtils.countRowsInTable(jdbcTemplate, GIFT_CERTIFICATE_TAG_TABLE);
-        int expectedTableRows = 15;
+        int expectedTableRows = 14;
 
         assertEquals(expectedTableRows, actualTableRows);
     }

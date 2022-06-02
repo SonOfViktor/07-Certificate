@@ -1,12 +1,9 @@
 package com.epam.esm.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 @Entity
@@ -21,11 +18,9 @@ public class UserOrder {
     @Digits(integer = 3, fraction = 2)
     private BigDecimal cost;
 
-    private LocalDateTime createdDate;
-
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 
     @ManyToOne
     @JoinColumn(name = "gift_certificate_id")
@@ -34,11 +29,10 @@ public class UserOrder {
     public UserOrder() {
     }
 
-    public UserOrder(int orderId, BigDecimal cost, LocalDateTime createdDate, User user, GiftCertificate giftCertificate) {
+    public UserOrder(int orderId, BigDecimal cost, Payment payment, GiftCertificate giftCertificate) {
         this.orderId = orderId;
         this.cost = cost;
-        this.createdDate = createdDate;
-        this.user = user;
+        this.payment = payment;
         this.giftCertificate = giftCertificate;
     }
 
@@ -58,23 +52,14 @@ public class UserOrder {
         this.cost = cost;
     }
 
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
+    public Payment getPayment() {
+        return payment;
     }
 
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate.truncatedTo(ChronoUnit.MILLIS);
+    public void setPayment(Payment payment) {
+        this.payment = payment;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    @JsonIgnore
     public GiftCertificate getGiftCertificate() {
         return giftCertificate;
     }
@@ -88,12 +73,12 @@ public class UserOrder {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserOrder userOrder = (UserOrder) o;
-        return orderId == userOrder.orderId && Objects.equals(cost, userOrder.cost) && Objects.equals(createdDate, userOrder.createdDate);
+        return Objects.equals(cost, userOrder.cost) && Objects.equals(payment, userOrder.payment) && Objects.equals(giftCertificate, userOrder.giftCertificate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(orderId, cost, createdDate);
+        return Objects.hash(cost, payment, giftCertificate);
     }
 
     @Override
@@ -101,7 +86,6 @@ public class UserOrder {
         return "Order{" +
                 "orderId=" + orderId +
                 ", cost=" + cost +
-                ", createdDate=" + createdDate +
                 '}';
     }
 
@@ -123,13 +107,8 @@ public class UserOrder {
             return this;
         }
 
-        public UserOrder.UserOrderBuilder setCreateDate(LocalDateTime createdDate) {
-            userOrder.setCreatedDate(createdDate);
-            return this;
-        }
-
-        public UserOrder.UserOrderBuilder setUser(User user) {
-            userOrder.setUser(user);
+        public UserOrder.UserOrderBuilder setPayment(Payment payment) {
+            userOrder.setPayment(payment);
             return this;
         }
 

@@ -2,9 +2,10 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.UserDao;
-import com.epam.esm.dao.UserOrderDao;
-import com.epam.esm.dto.UserOrderDto;
+import com.epam.esm.dao.PaymentDao;
+import com.epam.esm.dto.PaymentDto;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Payment;
 import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserOrder;
 import com.epam.esm.exception.ResourceNotFoundException;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -24,12 +26,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UserOrderServiceImplTest {
+class PaymentServiceImplTest {
     @InjectMocks
-    private UserOrderServiceImpl userOrderService;
+    private PaymentServiceImpl userOrderService;
 
     @Mock
-    private UserOrderDao userOrderDao;
+    private PaymentDao paymentDao;
 
     @Mock
     private UserDao userDao;
@@ -38,51 +40,62 @@ class UserOrderServiceImplTest {
     private GiftCertificateDao giftCertificateDao;
 
     @Test
-    void testCreateOrder() {
+    void testCreatePayment() {
         User user = new User(1, "Maks", "Silev");
+
         GiftCertificate giftCertificate = new GiftCertificate.GiftCertificateBuilder()
                 .setGiftCertificateId(1)
                 .setPrice(new BigDecimal("40.00"))
                 .setName("Oz.by")
                 .createGiftCertificate();
+
         UserOrder order = new UserOrder.UserOrderBuilder()
                 .setUserOrderId(1)
                 .setCost(new BigDecimal("40.00"))
-                .setCreateDate(LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0))
-                .setUser(user)
                 .setGiftCertificate(giftCertificate)
                 .createUserOrder();
+
+        Payment payment = new Payment.PaymentBuilder()
+                .setPaymentId(1)
+                .setUserOrder(List.of(order))
+                .setCreatedDate(LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0))
+                .setUser(user)
+                .createPayment();
 
         when(userDao.readUserById(1)).thenReturn(Optional.of(user));
         when(giftCertificateDao.readGiftCertificate(1)).thenReturn(Optional.of(giftCertificate));
-        when(userOrderDao.createOrder(any(UserOrder.class))).thenReturn(order);
+        when(paymentDao.createPayment(any(Payment.class))).thenReturn(payment);
 
-        UserOrderDto expected = new UserOrderDto(
-                1, "Maks Silev", "Oz.by",
-                new BigDecimal("40.00"),
+        PaymentDto expected = new PaymentDto(
+                1, "Maks Silev",
+                List.of(new PaymentDto.UserOrderDto("Oz.by", new BigDecimal("40.00"))),
                 LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0));
-        UserOrderDto actual = userOrderService.createOrder(1, 1);
+        PaymentDto actual = userOrderService.addPayment(1, List.of(1));
 
         assertEquals(expected, actual);
     }
 
     @Test
-    void testCreateOrderWithoutUser() {
+    void testCreatePaymentWithoutUser() {
+        List<Integer> certificateIdList = List.of(1);
+
         when(userDao.readUserById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> userOrderService.createOrder(99, 1));
+        assertThrows(ResourceNotFoundException.class, () -> userOrderService.addPayment(99, certificateIdList));
     }
 
     @Test
-    void testCreateOrderWithoutGiftCertificate() {
+    void testCreatePaymentWithoutGiftCertificate() {
+        List<Integer> certificateIdList = List.of(99);
+
         when(userDao.readUserById(1)).thenReturn(Optional.of(new User()));
         when(giftCertificateDao.readGiftCertificate(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> userOrderService.createOrder(1, 99));
+        assertThrows(ResourceNotFoundException.class, () -> userOrderService.addPayment(1, certificateIdList));
     }
 
     @Test
-    void testReadOrder() {
+    void testReadPayment() {
         User user = new User(1, "Maks", "Silev");
         GiftCertificate giftCertificate = new GiftCertificate.GiftCertificateBuilder()
                 .setGiftCertificateId(1)
@@ -91,30 +104,28 @@ class UserOrderServiceImplTest {
         UserOrder order = new UserOrder.UserOrderBuilder()
                 .setUserOrderId(1)
                 .setCost(new BigDecimal("40.00"))
-                .setCreateDate(LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0))
-                .setUser(user)
                 .setGiftCertificate(giftCertificate)
                 .createUserOrder();
-        when(userOrderDao.readOrder(1)).thenReturn(Optional.of(order));
+        Payment payment = new Payment.PaymentBuilder()
+                .setPaymentId(1)
+                .setUser(user)
+                .setUserOrder(List.of(order))
+                .setCreatedDate(LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0))
+                .createPayment();
 
-        UserOrderDto expected = new UserOrderDto(
-                1, "Maks Silev", "Oz.by",
-                new BigDecimal("40.00"),
+        when(paymentDao.readPayment(1)).thenReturn(payment);
+
+        PaymentDto expected = new PaymentDto(
+                1, "Maks Silev",
+                List.of(new PaymentDto.UserOrderDto("Oz.by", new BigDecimal("40.00"))),
                 LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0));
-        UserOrderDto actual = userOrderService.readOrder(1);
+        PaymentDto actual = userOrderService.findPayment(1);
 
         assertEquals(expected, actual);
     }
 
     @Test
-    void testReadNonExistOrder() {
-        when(userOrderDao.readOrder(99)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> userOrderService.readOrder(99));
-    }
-
-    @Test
-    void testReadUserOrder() {
+    void testReadPaymentsByUserId() {
         User user = new User(1, "Maks", "Silev");
         GiftCertificate giftCertificate = new GiftCertificate.GiftCertificateBuilder()
                 .setGiftCertificateId(1)
@@ -123,25 +134,29 @@ class UserOrderServiceImplTest {
         UserOrder order = new UserOrder.UserOrderBuilder()
                 .setUserOrderId(1)
                 .setCost(new BigDecimal("40.00"))
-                .setCreateDate(LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0))
-                .setUser(user)
                 .setGiftCertificate(giftCertificate)
                 .createUserOrder();
-        when(userOrderDao.readUserOrder(1)).thenReturn(List.of(order));
+        Payment payment = new Payment.PaymentBuilder()
+                .setPaymentId(1)
+                .setUser(user)
+                .setUserOrder(List.of(order))
+                .setCreatedDate(LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0))
+                .createPayment();
+        when(paymentDao.readPaymentByUserId(1)).thenReturn(List.of(payment));
 
-        List<UserOrderDto> expected = List.of(new UserOrderDto(
-                1, "Maks Silev", "Oz.by",
-                new BigDecimal("40.00"),
+        List<PaymentDto> expected = List.of(new PaymentDto(
+                1, "Maks Silev",
+                List.of(new PaymentDto.UserOrderDto("Oz.by", new BigDecimal("40.00"))),
                 LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0)));
-        List<UserOrderDto> actual = userOrderService.readUserOrder(1);
+        List<PaymentDto> actual = userOrderService.findPaymentsByUserId(1);
 
         assertEquals(expected, actual);
     }
 
     @Test
-    void testReadUserOrderWithNonExistUser() {
-        when(userOrderDao.readUserOrder(99)).thenReturn(Collections.emptyList());
+    void testReadPaymentsWithNonExistUser() {
+        when(paymentDao.readPaymentByUserId(99)).thenReturn(Collections.emptyList());
 
-        assertThrows(ResourceNotFoundException.class, () -> userOrderService.readUserOrder(99));
+        assertThrows(ResourceNotFoundException.class, () -> userOrderService.findPaymentsByUserId(99));
     }
 }
