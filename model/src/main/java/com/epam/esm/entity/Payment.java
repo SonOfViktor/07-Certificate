@@ -1,5 +1,6 @@
 package com.epam.esm.entity;
 
+import com.epam.esm.listener.AuditListener;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -8,6 +9,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "payments", schema = "module_3")
+@EntityListeners(AuditListener.class)
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,5 +1,6 @@
 package com.epam.esm.entity;
 
+import com.epam.esm.listener.AuditListener;
 import javax.persistence.*;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
@@ -8,6 +9,7 @@ import java.util.Objects;
 
 @Entity
 @Table(schema = "module_3", name = "orders")
+@EntityListeners(AuditListener.class)
 public class UserOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

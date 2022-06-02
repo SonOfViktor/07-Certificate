@@ -1,5 +1,6 @@
 package com.epam.esm.entity;
 
+import com.epam.esm.listener.AuditListener;
 import com.epam.esm.validategroup.ForCreate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -11,8 +12,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-@Table(name = "gift_certificates", schema = "module_3")
 @Entity
+@Table(name = "gift_certificates", schema = "module_3")
+@EntityListeners(AuditListener.class)
 public class GiftCertificate {
     private static final String DATE_JSON_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
