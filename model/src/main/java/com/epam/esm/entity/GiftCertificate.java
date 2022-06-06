@@ -55,8 +55,9 @@ public class GiftCertificate {
     public GiftCertificate() {
     }
 
-    public GiftCertificate(String name, String description, BigDecimal price, int duration,
+    public GiftCertificate(int id, String name, String description, BigDecimal price, int duration,
                            LocalDateTime createDate, LocalDateTime lastUpdateDate) {
+        giftCertificateId = id;
         this.name = name;
         this.description = description;
         this.price = price;

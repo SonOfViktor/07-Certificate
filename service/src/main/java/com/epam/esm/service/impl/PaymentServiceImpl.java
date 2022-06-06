@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.math.NumberUtils.*;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -92,7 +93,12 @@ public class PaymentServiceImpl implements PaymentService {
     private List<PaymentDto.UserOrderDto> createUserOrderDtoListFromPayment(Payment payment) {
         return payment.getOrders().stream()
                 .map(order -> new PaymentDto.UserOrderDto(
-                        (order.getGiftCertificate() != null) ? order.getGiftCertificate().getName() : DELETED,
+                        (order.getGiftCertificate() != null) ?
+                                order.getGiftCertificate().getGiftCertificateId() :
+                                INTEGER_ZERO,
+                        (order.getGiftCertificate() != null) ?
+                                order.getGiftCertificate().getName() :
+                                DELETED,
                         order.getCost()))
                 .toList();
     }

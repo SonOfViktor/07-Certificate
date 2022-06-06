@@ -68,7 +68,7 @@ class PaymentServiceImplTest {
 
         PaymentDto expected = new PaymentDto(
                 1, "Maks Silev",
-                List.of(new PaymentDto.UserOrderDto("Oz.by", new BigDecimal("40.00"))),
+                List.of(new PaymentDto.UserOrderDto(1, "Oz.by", new BigDecimal("40.00"))),
                 LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0));
         PaymentDto actual = userOrderService.addPayment(1, List.of(1));
 
@@ -117,7 +117,7 @@ class PaymentServiceImplTest {
 
         PaymentDto expected = new PaymentDto(
                 1, "Maks Silev",
-                List.of(new PaymentDto.UserOrderDto("Oz.by", new BigDecimal("40.00"))),
+                List.of(new PaymentDto.UserOrderDto(1,"Oz.by", new BigDecimal("40.00"))),
                 LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0));
         PaymentDto actual = userOrderService.findPayment(1);
 
@@ -146,7 +146,7 @@ class PaymentServiceImplTest {
 
         List<PaymentDto> expected = List.of(new PaymentDto(
                 1, "Maks Silev",
-                List.of(new PaymentDto.UserOrderDto("Oz.by", new BigDecimal("40.00"))),
+                List.of(new PaymentDto.UserOrderDto(1,"Oz.by", new BigDecimal("40.00"))),
                 LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0)));
         List<PaymentDto> actual = userOrderService.findPaymentsByUserId(1);
 

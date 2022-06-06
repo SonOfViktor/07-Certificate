@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,6 +33,15 @@ class UserDaoImplTest {
     void testTableRowQuantity() {
         int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, USER_TABLE);
         int expected = 2;
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testReadAllUser() {
+        List<User> expected = List.of(new User(1, "Ivan", "Pupkin"),
+                new User(2, "Sanek", "Lupkin"));
+        List<User> actual = userDao.readAllUser();
+
         assertEquals(expected, actual);
     }
 
