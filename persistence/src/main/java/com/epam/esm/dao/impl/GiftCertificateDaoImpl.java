@@ -29,9 +29,14 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public int createGiftCertificate(GiftCertificate certificate) {
+    public GiftCertificate createGiftCertificate(GiftCertificate certificate) {
+        LocalDateTime createTime = LocalDateTime.now();
+        certificate.setCreateDate(createTime);
+        certificate.setLastUpdateDate(createTime);
+
         entityManager.persist(certificate);
-        return certificate.getGiftCertificateId();
+
+        return certificate;
     }
 
     @Override
@@ -46,12 +51,14 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
         Root<GiftCertificate> giftCertificate = criteria.from(GiftCertificate.class);
 
-        List<Predicate> predicates = criteriaParameterMaker.createPredicate(criteriaBuilder, giftCertificate, parameter);
+        List<Predicate> predicates = criteriaParameterMaker
+                .createPredicate(criteriaBuilder, criteria, giftCertificate, parameter);
         List<Order> orders = criteriaParameterMaker.createOrder(criteriaBuilder, giftCertificate, parameter);
 
         criteria.select(giftCertificate)
                 .where(predicates.toArray(Predicate[]::new))
-                .orderBy(orders);
+                .orderBy(orders)
+                .groupBy(giftCertificate.get(GiftCertificate_.giftCertificateId));
 
         return entityManager.createQuery(criteria).getResultList();
     }

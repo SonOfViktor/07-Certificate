@@ -1,22 +1,26 @@
 package com.epam.esm.entity;
 
+import com.epam.esm.listener.AuditListener;
 import com.epam.esm.validategroup.ForCreate;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
-@Table(name = "gift_certificate", schema = "module_two")
 @Entity
+@Table(name = "gift_certificates", schema = "module_3")
+@EntityListeners(AuditListener.class)
 public class GiftCertificate {
     private static final String DATE_JSON_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int giftCertificateId;
 
     @NotNull(groups = ForCreate.class)
@@ -35,19 +39,18 @@ public class GiftCertificate {
     @Digits(integer = 2, fraction = 0)
     private int duration;
 
-    @Null
-    @Column(insertable = false)
     private LocalDateTime createDate;
 
-    @Null
-    @Column(insertable = false)
     private LocalDateTime lastUpdateDate;
 
     @ManyToMany
-    @JoinTable(name = "gift_certificate_tag", schema = "module_two",
-            joinColumns = @JoinColumn(name = "gct_gift_certificate_id"),
-            inverseJoinColumns = @JoinColumn(name = "gct_tag_id"))
-    private List<Tag> tags = new ArrayList<>();
+    @JoinTable(name = "gift_certificate_tag", schema = "module_3",
+            joinColumns = @JoinColumn(name = "gift_certificate_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tag> tags = new HashSet<>();
+
+    @OneToMany(mappedBy = "giftCertificate")
+    private List<UserOrder> userOrders;
 
     public GiftCertificate() {
     }
@@ -108,7 +111,7 @@ public class GiftCertificate {
     }
 
     public void setCreateDate(LocalDateTime createDate) {
-        this.createDate = createDate;
+        this.createDate = createDate.truncatedTo(ChronoUnit.MILLIS);
     }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_JSON_PATTERN)
@@ -117,15 +120,27 @@ public class GiftCertificate {
     }
 
     public void setLastUpdateDate(LocalDateTime lastUpdateDate) {
-        this.lastUpdateDate = lastUpdateDate;
+        this.lastUpdateDate = lastUpdateDate.truncatedTo(ChronoUnit.MILLIS);
     }
 
-    public List<Tag> getTags() {
+    @JsonIgnore
+    public Set<Tag> getTags() {
         return tags;
     }
 
-    public void setTags(List<Tag> tags) {
+    @JsonIgnore
+    public void setTags(Set<Tag> tags) {
         this.tags = tags;
+    }
+
+    @JsonIgnore
+    public List<UserOrder> getUserOrders() {
+        return userOrders;
+    }
+
+    @JsonIgnore
+    public void setUserOrders(List<UserOrder> userOrders) {
+        this.userOrders = userOrders;
     }
 
     @Override
@@ -197,7 +212,7 @@ public class GiftCertificate {
             return this;
         }
 
-        public GiftCertificateBuilder setTags(List<Tag> tags) {
+        public GiftCertificateBuilder setTags(Set<Tag> tags) {
             giftCertificate.setTags(tags);
             return this;
         }

@@ -3,6 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The interface provide methods to control business logic related with tags
@@ -12,17 +13,17 @@ public interface TagService {
      * Add specified tag.
      *
      * @param tag the tag to add
-     * @return generated id for added tag
+     * @return the tag with generated id by database
      */
-    int addTag(Tag tag);
+    Tag addTag(Tag tag);
 
     /**
      * Add specified tags.
      *
      * @param tags list with tags to add
-     * @return the long that shows how much element was added
+     * @return the set of tags with generated id by database
      */
-    long addTags(List<Tag> tags);
+    Set<Tag> addTags(Set<Tag> tags);
 
     /**
      * Find all tags.
@@ -35,9 +36,9 @@ public interface TagService {
      * Find tags related with specified gift certificate id.
      *
      * @param certificateId the gift certificate id
-     * @return the list with tags related with specified gift certificate id
+     * @return the set with tags related with specified gift certificate id
      */
-    List<Tag> findTagsByCertificateId(int certificateId);
+    Set<Tag> findTagsByCertificateId(int certificateId);
 
     /**
      * Find tag with specified id.
@@ -47,6 +48,13 @@ public interface TagService {
      * @throws ResourceNotFoundException if tag with specified id wasn't found
      */
     Tag findTagById(int tagId);
+
+    /**
+     * Read the most widely used tag of a user with the highest cost of all orders
+     *
+     * @return list of most widely used tag with the highest cost
+     */
+    List<Tag> findMostPopularHighestPriceTag();
 
     /**
      * Delete tag with specified id.

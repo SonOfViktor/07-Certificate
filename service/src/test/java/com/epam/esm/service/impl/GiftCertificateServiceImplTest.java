@@ -1,18 +1,15 @@
-package com.epam.esm.impl;
+package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.SelectQueryParameter;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.service.impl.GiftCertificateServiceImpl;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,9 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest
 class GiftCertificateServiceImplTest {
     private List<GiftCertificate> certificateList;
 
@@ -33,17 +28,18 @@ class GiftCertificateServiceImplTest {
     @Mock
     private GiftCertificateDao giftCertificateDao;
 
-    @BeforeAll
-    void beforeAll() {
+    @BeforeEach
+    void init() {
         certificateList = List.of(new GiftCertificate(), new GiftCertificate());
     }
 
     @Test
     void testAddGiftCertificate() {
-        when(giftCertificateDao.createGiftCertificate(new GiftCertificate())).thenReturn(1);
-        int actual = giftCertificateService.addGiftCertificate(new GiftCertificate());
+        GiftCertificate expected = new GiftCertificate();
+        when(giftCertificateDao.createGiftCertificate(new GiftCertificate())).thenReturn(expected);
+        GiftCertificate actual = giftCertificateService.addGiftCertificate(expected);
 
-        assertEquals(1, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -56,7 +52,7 @@ class GiftCertificateServiceImplTest {
 
     @Test
     void testFindCertificatesWithParams() {
-        SelectQueryParameter params =  new SelectQueryParameter("food", "e",
+        SelectQueryParameter params =  new SelectQueryParameter(List.of("food"), "e",
                 "e", null, null);
 
         when(giftCertificateDao.readGiftCertificateWithParam(params))

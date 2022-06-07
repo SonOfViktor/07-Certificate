@@ -135,13 +135,14 @@ public class ExceptionAdviceController {
     }
 
     private Object[] takeArgsForMethodParameterNotValidCode(ConstraintViolationException ex) {
-        List<Object> arguments = new ArrayList<>();
-
-        ex.getConstraintViolations().stream()
-                .peek(cv -> arguments.add(cv.getInvalidValue()))
-                .peek(cv -> arguments.add(cv.getPropertyPath().iterator().next().getName()))
-                .forEach(cv -> arguments.add(cv.getRootBeanClass().getSimpleName()));
-
-        return arguments.toArray();
+        return ex.getConstraintViolations().stream()
+                .map(cv -> List.of(
+                        cv.getInvalidValue(),
+                        cv.getPropertyPath().iterator().next().getName(),
+                        cv.getRootBeanClass().getSimpleName())
+                )
+                .map(List::toArray)
+                .findFirst()
+                .orElse(new Object[]{});
     }
 }

@@ -1,12 +1,15 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.TagDao;
-import com.epam.esm.entity.Tag;
+import com.epam.esm.dao.criteria.SubqueryMostUsedHighestPriceTagMaker;
+import com.epam.esm.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
-import java.util.List;
-import java.util.Optional;
+import javax.persistence.criteria.*;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class TagDaoImpl implements TagDao {
@@ -23,26 +26,27 @@ public class TagDaoImpl implements TagDao {
     public static final String ID = "id";
 
     private final EntityManager entityManager;
+    private final SubqueryMostUsedHighestPriceTagMaker subqueryTagMaker;
 
     @Autowired
-    public TagDaoImpl(EntityManager entityManager) {
+    public TagDaoImpl(EntityManager entityManager, SubqueryMostUsedHighestPriceTagMaker subqueryTagMaker) {
         this.entityManager = entityManager;
+        this.subqueryTagMaker = subqueryTagMaker;
     }
 
     @Override
-    public int createTag(Tag tag) {
+    public Tag createTag(Tag tag) {
         readTagByName(tag.getName())
-                .ifPresentOrElse(t -> {}, () -> entityManager.persist(tag));
+                .ifPresentOrElse(t -> tag.setTagId(t.getTagId()), () -> entityManager.persist(tag));
 
-        return tag.getTagId();
+        return tag;
     }
 
     @Override
-    public long addTags(List<Tag> tags) {
+    public Set<Tag> addTags(Set<Tag> tags) {
         return tags.stream()
                 .map(this::createTag)
-                .filter(id -> id != 0)
-                .count();
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -51,10 +55,12 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public List<Tag> readAllTagByCertificateId(int certificateId) {
-        return entityManager.createQuery(SELECT_TAGS_BY_GIFT_CERTIFICATE_ID_HQL, Tag.class)
+    public Set<Tag> readAllTagByCertificateId(int certificateId) {
+        List<Tag> tags = entityManager.createQuery(SELECT_TAGS_BY_GIFT_CERTIFICATE_ID_HQL, Tag.class)
                 .setParameter(ID, certificateId)
                 .getResultList();
+
+        return new HashSet<>(tags);
     }
 
     @Override
@@ -68,6 +74,28 @@ public class TagDaoImpl implements TagDao {
                 .getResultList();
 
         return (!tags.isEmpty()) ? Optional.of(tags.get(0)) : Optional.empty();
+    }
+
+    public List<Tag> readMostPopularHighestPriceTag() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> criteria = criteriaBuilder.createQuery(Tag.class);
+
+        Subquery<BigDecimal> maxPrice = subqueryTagMaker.createMaxPriceSubquery(criteriaBuilder, criteria);
+        Subquery<Long> tagCount = subqueryTagMaker.createTagCountWithMaxPriceSubquery(criteriaBuilder, criteria, maxPrice);
+
+        Root<Tag> tag = criteria.from(Tag.class);
+        ListJoin<Tag, GiftCertificate> giftCertificate = tag.join(Tag_.giftCertificates);
+        ListJoin<GiftCertificate, UserOrder> userOrder = giftCertificate.join(GiftCertificate_.userOrders);
+
+        criteria.select(tag)
+                .where(criteriaBuilder.equal(userOrder.get(UserOrder_.cost), maxPrice))
+                .groupBy(tag.get(Tag_.tagId), tag.get(Tag_.name))
+                .having(
+                        criteriaBuilder.greaterThanOrEqualTo(
+                                criteriaBuilder.count(tag.get(Tag_.name)), criteriaBuilder.all(tagCount))
+                );
+
+        return entityManager.createQuery(criteria).getResultList();
     }
 
     @Override

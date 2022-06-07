@@ -14,9 +14,9 @@ public interface GiftCertificateService {
      * Add specified gift certificate.
      *
      * @param certificate the certificate to add
-     * @return generated id for added certificate
+     * @return the gift certificate with generated id by database
      */
-    int addGiftCertificate(GiftCertificate certificate);
+    GiftCertificate addGiftCertificate(GiftCertificate certificate);
 
     /**
      * Find all gift certificates.

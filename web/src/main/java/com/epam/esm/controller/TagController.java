@@ -8,7 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/tags")
@@ -22,7 +22,7 @@ public class TagController {
     }
 
     @GetMapping
-    public Set<Tag> showAllTags() {
+    public List<Tag> showAllTags() {
         return tagService.findAllTags();
     }
 
@@ -31,13 +31,15 @@ public class TagController {
         return tagService.findTagById(id);
     }
 
+    @GetMapping("/highest")
+    public List<Tag> showMostPopularHighestPriceTag() {
+        return tagService.findMostPopularHighestPriceTag();
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Tag addTag(@Valid @RequestBody Tag tag) {
-        int tagId = tagService.addTag(tag);
-        tag.setTagId(tagId);
-
-        return tag;
+        return tagService.addTag(tag);
     }
 
     @DeleteMapping("/{id}")
