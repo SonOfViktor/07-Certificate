@@ -40,7 +40,15 @@ class UserDaoImplTest {
     void testReadAllUser() {
         List<User> expected = List.of(new User(1, "Ivan", "Pupkin"),
                 new User(2, "Sanek", "Lupkin"));
-        List<User> actual = userDao.readAllUser();
+        List<User> actual = userDao.readAllUser(0, 10);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testReadAllUserWithPagination() {
+        List<User> expected = List.of(new User(2, "Sanek", "Lupkin"));
+        List<User> actual = userDao.readAllUser(1, 10);
 
         assertEquals(expected, actual);
     }
@@ -58,5 +66,12 @@ class UserDaoImplTest {
         Optional<User> actual = userDao.readUserById(8);
 
         assertEquals(Optional.empty(), actual);
+    }
+
+    @Test
+    void testCountUsers() {
+        int actual = userDao.countUser();
+
+        assertEquals(2, actual);
     }
 }

@@ -1,16 +1,17 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.assembler.GiftCertificateModelAssembler;
 import com.epam.esm.assembler.TagModelAssembler;
 import com.epam.esm.dto.CertificateTagsDto;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Page;
 import com.epam.esm.entity.SelectQueryParameter;
-import com.epam.esm.assembler.GiftCertificateModelAssembler;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.GiftCertificateTagDtoService;
+import com.epam.esm.service.TagService;
 import com.epam.esm.validategroup.ForCreate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -18,26 +19,26 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.groups.Default;
-import java.util.List;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping("/certificates")
 @Validated
 public class GiftCertificateController {
     public static final String ALL_GIFT_CERTIFICATES = "all_gift_certificates";
-    public static final String ALL_TAGS = "all_tags";
     public static final String USERS = "users";
     private final GiftCertificateTagDtoService certificateTagService;
+    private final TagService tagService;
     private final GiftCertificateService certificateService;
     private final GiftCertificateModelAssembler certificateAssembler;
     private final TagModelAssembler tagAssembler;
 
     @Autowired
-    public GiftCertificateController(GiftCertificateTagDtoService certificateTagService, TagModelAssembler tagAssembler,
+    public GiftCertificateController(GiftCertificateTagDtoService certificateTagService, TagService tagService, TagModelAssembler tagAssembler,
                                      GiftCertificateService certificateService, GiftCertificateModelAssembler assembler) {
         this.certificateTagService = certificateTagService;
+        this.tagService = tagService;
         this.certificateService = certificateService;
         this.certificateAssembler = assembler;
         this.tagAssembler = tagAssembler;
@@ -47,54 +48,55 @@ public class GiftCertificateController {
     public EntityModel<GiftCertificate> showCertificate(@PathVariable @Positive int id) {
         CertificateTagsDto giftCertificateTagDto = certificateTagService.findGiftCertificateTagDto(id);
 
-        return certificateAssembler.toModel(giftCertificateTagDto.certificate())
-                .add(linkTo(methodOn(GiftCertificateController.class)
-                        .showCertificateWithParameters(null))
-                        .withRel(ALL_GIFT_CERTIFICATES));
+        return certificateAssembler.toModel(giftCertificateTagDto)
+                .add(linkTo(GiftCertificateController.class).withRel(ALL_GIFT_CERTIFICATES));
     }
 
     @GetMapping("/{id}/tags")
-    public CollectionModel<EntityModel<Tag>> showTagWithCertificateId(@PathVariable @Positive int id) {
-        CertificateTagsDto giftCertificateTagDto = certificateTagService.findGiftCertificateTagDto(id);
+    public Page<EntityModel<Tag>> showTagWithCertificateId(
+            @PathVariable @Positive Integer id,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size) {
 
-        return tagAssembler.toCollectionModel(giftCertificateTagDto.tags())
-                .add(linkTo(methodOn(TagController.class).showAllTags()).withRel(ALL_TAGS));
+        Page<Tag> tags = tagService.findTagsByCertificateId(id, page, size);
+
+        return tagAssembler.toPageModel(tags);
     }
 
     @PostMapping
-    public CollectionModel<EntityModel<GiftCertificate>> showCertificateWithParameters(
-            @Valid @RequestBody(required = false) SelectQueryParameter queryParam) {
-        List<GiftCertificate> giftCertificates = (queryParam == null) ?
-                certificateService.findAllCertificates() :
-                certificateService.findCertificatesWithParams(queryParam);
+    public Page<EntityModel<GiftCertificate>> showCertificateWithParameters(
+            @Valid @RequestBody(required = false) SelectQueryParameter queryParam,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size) {
 
-        return certificateAssembler.toCollectionModel(giftCertificates)
-                .add(linkTo(methodOn(GiftCertificateController.class).showCertificateWithParameters(queryParam))
-                        .withSelfRel())
-                .add(linkTo(methodOn(UserController.class).showAllUsers()).withRel(USERS));
+        Page<CertificateTagsDto> certificates = (queryParam == null) ?
+                certificateTagService.findAllGiftCertificateTagDto(page, size) :
+                certificateTagService.findGiftCertificateTagDtoByParam(queryParam, page, size);
+
+        return certificateAssembler.toPageModel(certificates)
+                .add(linkTo(UserController.class).withRel(USERS));
     }
 
     @PostMapping("/creating")
     @ResponseStatus(HttpStatus.CREATED)
     public EntityModel<GiftCertificate> addCertificate(@Validated({ForCreate.class, Default.class})
-                                             @RequestBody CertificateTagsDto certificateTagsDto) {
+                                                       @RequestBody CertificateTagsDto certificateTagsDto) {
+
         CertificateTagsDto newCertificateTagsDto = certificateTagService.addGiftCertificateTagDto(certificateTagsDto);
 
-        return certificateAssembler.toModel(newCertificateTagsDto.certificate())
-                .add(linkTo(methodOn(GiftCertificateController.class).showCertificateWithParameters(null))
-                        .withRel(ALL_GIFT_CERTIFICATES));
+        return certificateAssembler.toModel(newCertificateTagsDto)
+                .add(linkTo(GiftCertificateController.class).withRel(ALL_GIFT_CERTIFICATES));
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public EntityModel<GiftCertificate> updateCertificate(@Valid @RequestBody CertificateTagsDto certificateTagDto,
-                                                @PathVariable @Positive int id) {
+                                                          @PathVariable @Positive int id) {
         CertificateTagsDto updatedCertificateTagsDto =
                 certificateTagService.updateGiftCertificateTagDto(certificateTagDto, id);
 
-        return certificateAssembler.toModel(updatedCertificateTagsDto.certificate())
-                .add(linkTo(methodOn(GiftCertificateController.class).showCertificateWithParameters(null))
-                        .withRel(ALL_GIFT_CERTIFICATES));
+        return certificateAssembler.toModel(updatedCertificateTagsDto)
+                .add(linkTo(GiftCertificateController.class).withRel(ALL_GIFT_CERTIFICATES));
     }
 
     @DeleteMapping("/{id}")

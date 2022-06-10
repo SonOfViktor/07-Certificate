@@ -1,9 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dto.CertificateTagsDto;
-import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.SelectQueryParameter;
-import com.epam.esm.entity.Tag;
+import com.epam.esm.entity.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,24 +70,29 @@ class GiftCertificateTagDtoServiceImplTest {
 
     @Test
     void testFindAllGiftCertificateTagDto() {
-        when(giftCertificateService.findAllCertificates()).thenReturn(giftCertificateList);
+        Page<GiftCertificate> page = new Page<>(giftCertificateList, new PageMeta(10, 2, 1, 1));
+        when(giftCertificateService.findAllCertificates(1, 10)).thenReturn(page);
         when(tagService.findTagsByCertificateId(anyInt())).thenReturn(tags);
 
-        List<CertificateTagsDto> actual = giftCertificateTagDtoService.findAllGiftCertificateTagDto();
+        Page<CertificateTagsDto> actual = giftCertificateTagDtoService.findAllGiftCertificateTagDto(1, 10);
+        Page<CertificateTagsDto> expected = new Page<>(certificateTagsDtoList, new PageMeta(10, 2, 1, 1));
 
-        assertEquals(certificateTagsDtoList, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
     void testFindGiftCertificateTagDtoByParam() {
+        Page<GiftCertificate> page = new Page<>(giftCertificateList, new PageMeta(10, 2, 1, 1));
         SelectQueryParameter selectQueryParameter = new SelectQueryParameter(null, null, null, null, null);
-        when(giftCertificateService.findCertificatesWithParams(selectQueryParameter)).thenReturn(giftCertificateList);
+
+        when(giftCertificateService.findCertificatesWithParams(selectQueryParameter, 1, 10)).thenReturn(page);
         when(tagService.findTagsByCertificateId(anyInt())).thenReturn(tags);
 
-        List<CertificateTagsDto> actual = giftCertificateTagDtoService
-                .findGiftCertificateTagDtoByParam(selectQueryParameter);
+        Page<CertificateTagsDto> expected = new Page<>(certificateTagsDtoList, new PageMeta(10, 2, 1, 1));
+        Page<CertificateTagsDto> actual = giftCertificateTagDtoService
+                .findGiftCertificateTagDtoByParam(selectQueryParameter, 1, 10);
 
-        assertEquals(certificateTagsDtoList, actual);
+        assertEquals(expected, actual);
     }
 
     @Test

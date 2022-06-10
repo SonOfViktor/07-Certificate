@@ -1,5 +1,6 @@
 package com.epam.esm.service;
 
+import com.epam.esm.entity.Page;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import java.util.List;
@@ -26,19 +27,31 @@ public interface TagService {
     Set<Tag> addTags(Set<Tag> tags);
 
     /**
-     * Find all tags.
+     * Find specified page with tags.
      *
-     * @return the list with all tags
+     * @param page number of page with tags
+     * @param size amount objects in one page
+     * @return the page with tags
      */
-    List<Tag> findAllTags();
+    Page<Tag> findAllTags(int page, int size);
 
     /**
-     * Find tags related with specified gift certificate id.
+     * Find tags related to gift certificate with specified id.
      *
      * @param certificateId the gift certificate id
      * @return the set with tags related with specified gift certificate id
      */
     Set<Tag> findTagsByCertificateId(int certificateId);
+
+    /**
+     * Find page with tags related to gift certificate with specified id
+     *
+     * @param certificateId gift certificate id
+     * @param page number of page with tags
+     * @param size amount objects in one page
+     * @return the page with tags related to gift certificate with specified id
+     */
+    Page<Tag> findTagsByCertificateId(int certificateId, int page, int size);
 
     /**
      * Find tag with specified id.

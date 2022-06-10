@@ -3,6 +3,7 @@ package com.epam.esm.dao;
 import com.epam.esm.entity.Tag;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,19 +28,31 @@ public interface TagDao {
     Set<Tag> addTags(Set<Tag> tags);
 
     /**
-     * Read all tag from database.
+     * Read tag from database.
      *
-     * @return the list with all tags in database
+     * @param offset initial offset in table with tags
+     * @param size amount tags to extract from table with tags
+     * @return the list with tags in database
      */
-    List<Tag> readAllTag();
+    List<Tag> readAllTag(int offset, int size);
 
     /**
-     * Read all tag related with specified gift certificate.
+     * Read tags related with specified gift certificate.
      *
-     * @param certificateId the gift certificate id
-     * @return the set tags related with specified gift certificate
+     * @param certificateId id of a gift certificate
+     * @return the set tags related to gift certificate with specified id
      */
-    Set<Tag> readAllTagByCertificateId(int certificateId);
+    Set<Tag> readTagByCertificateId(int certificateId);
+
+    /**
+     * Read tags related to gift certificate with specified id
+     *
+     * @param certificateId id of a gift certificate
+     * @param offset initial offset in table with tags
+     * @param size amount tags to extract from table with tags
+     * @return the list with tags in database related to gift certificate with specified id
+     */
+    Set<Tag> readTagByCertificateId(int certificateId, int offset, int size);
 
     /**
      * Read specified tag in database.
@@ -55,6 +68,14 @@ public interface TagDao {
      * @return list of most widely used tag with the highest cost
      */
     List<Tag> readMostPopularHighestPriceTag();
+
+    /**
+     * Find out amount of entries in table with tags
+     *
+     * @param params parameters that points criteria to count tags
+     * @return amount of entries in table with tags
+     */
+    int countTags(Map<String, Integer> params);
 
     /**
      * Delete tag from database.

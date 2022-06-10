@@ -3,20 +3,15 @@ package com.epam.esm.controller;
 import com.epam.esm.assembler.PaymentModelAssembler;
 import com.epam.esm.assembler.UserModelAssembler;
 import com.epam.esm.dto.PaymentDto;
+import com.epam.esm.entity.Page;
 import com.epam.esm.entity.User;
 import com.epam.esm.service.PaymentService;
 import com.epam.esm.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.Positive;
-import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -41,18 +36,24 @@ public class UserController {
     }
 
     @GetMapping
-    public CollectionModel<EntityModel<User>> showAllUsers() {
-        List<User> users = userService.findAllUser();
+    public Page<EntityModel<User>> showAllUsers(
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size) {
 
-        return userAssembler.toCollectionModel(users);
+        Page<User> users = userService.findAllUser(page, size);
+
+        return userAssembler.toPageModel(users);
     }
 
     @GetMapping("/{userId}/payments")
-    public CollectionModel<EntityModel<PaymentDto>> showUserPayments(@PathVariable @Positive int userId) {
-        List<PaymentDto> paymentsByUserId = paymentService.findPaymentsByUserId(userId);
+    public Page<EntityModel<PaymentDto>> showUserPayments(
+            @PathVariable @Positive Integer userId,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size) {
 
-        return paymentAssembler.toCollectionModel(paymentsByUserId)
-                .add(linkTo(methodOn(UserController.class).showUserPayments(userId)).withSelfRel())
-                .add(linkTo(methodOn(UserController.class).showAllUsers()).withRel(USERS));
+        Page<PaymentDto> paymentsByUserId = paymentService.findPaymentsByUserId(userId, page, size);
+
+        return paymentAssembler.toPageModel(paymentsByUserId)
+                .add(linkTo(methodOn(UserController.class).showAllUsers(page, size)).withRel(USERS));
     }
 }

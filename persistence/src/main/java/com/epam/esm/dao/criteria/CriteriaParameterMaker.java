@@ -16,7 +16,7 @@ import static org.apache.commons.lang3.math.NumberUtils.*;
 public class CriteriaParameterMaker {
     public static final String LIKE_PATTERN = "%%%s%%";
 
-    public List<Predicate> createPredicate(CriteriaBuilder criteriaBuilder, CriteriaQuery<GiftCertificate> criteria,
+    public List<Predicate> createPredicate(CriteriaBuilder criteriaBuilder, CriteriaQuery<?> criteria,
                                            Root<GiftCertificate> root, SelectQueryParameter params) {
         List<Predicate> predicates = new ArrayList<>();
 
@@ -57,12 +57,13 @@ public class CriteriaParameterMaker {
                 .ifPresent(orders::add);
         createGiftCertificateOrder(criteriaBuilder, root, params.orderDate(), GiftCertificate_.createDate)
                 .ifPresent(orders::add);
+        orders.add(criteriaBuilder.asc(root.get(GiftCertificate_.giftCertificateId)));
 
         return orders;
     }
 
     private Subquery<String> findGiftCertificateTags(CriteriaBuilder criteriaBuilder,
-                                                     CriteriaQuery<GiftCertificate> criteria,
+                                                     CriteriaQuery<?> criteria,
                                                      Path<Integer> certificateId) {
         Subquery<String> tagNameSubquery = criteria.subquery(String.class);
 

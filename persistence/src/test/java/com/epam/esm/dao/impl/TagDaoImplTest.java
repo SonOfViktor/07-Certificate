@@ -11,9 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -84,7 +82,15 @@ class TagDaoImplTest {
         List<Tag> expected = List.of(new Tag(1,"food"), new Tag(2,"stationery"),
                 new Tag(3,"shoe"), new Tag(4,"virtual"), new Tag(5,"paper"),
                 new Tag(6,"by"));
-        List<Tag> actual = tagDao.readAllTag();
+        List<Tag> actual = tagDao.readAllTag(0, 10);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testReadAllTagWithPagination() {
+        List<Tag> expected = List.of(new Tag(3,"shoe"), new Tag(4,"virtual"));
+        List<Tag> actual = tagDao.readAllTag(2, 2);
+
         assertEquals(expected, actual);
     }
 
@@ -92,13 +98,20 @@ class TagDaoImplTest {
     void testReadAllTagByCertificateId() {
         Set<Tag> expected = Set.of(new Tag(1,"food"), new Tag(2,"stationery"),
                 new Tag(5,"paper"), new Tag(6,"by"));
-        Set<Tag> actual = tagDao.readAllTagByCertificateId(3);
+        Set<Tag> actual = tagDao.readTagByCertificateId(3);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testReadAllTagByCertificateIdWithPagination() {
+        Set<Tag> expected = Set.of(new Tag(5,"paper"), new Tag(6,"by"));
+        Set<Tag> actual = tagDao.readTagByCertificateId(3, 2, 2);
         assertEquals(expected, actual);
     }
 
     @Test
     void testReadAllTagByNonexistentCertificateId() {
-        Set<Tag> actual = tagDao.readAllTagByCertificateId(22);
+        Set<Tag> actual = tagDao.readTagByCertificateId(22);
         assertTrue(actual.isEmpty());
     }
 
@@ -121,6 +134,29 @@ class TagDaoImplTest {
         List<Tag> actual = tagDao.readMostPopularHighestPriceTag();
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void testCountTagsWithCertificateId() {
+        Map<String, Integer> params = Map.of("id", 2);
+
+        int actual = tagDao.countTags(params);
+
+        assertEquals(3, actual);
+    }
+
+    @Test
+    void testCountTagsWithEmptyParams() {
+        int actual = tagDao.countTags(Collections.emptyMap());
+
+        assertEquals(6, actual);
+    }
+
+    @Test
+    void testCountTagsWithNullParams() {
+        int actual = tagDao.countTags(null);
+
+        assertEquals(6, actual);
     }
 
     @Test

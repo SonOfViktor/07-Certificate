@@ -6,11 +6,13 @@ import java.util.Optional;
 
 public interface UserDao {
     /**
-     * Read all users from database
+     * Read users from database
      *
-     * @return list with all users from database
+     * @param offset initial offset in table with users
+     * @param size amount entries to extract from table with users
+     * @return list with users from database
      */
-    List<User> readAllUser();
+    List<User> readAllUser(int offset, int size);
 
     /**
      * Read user from database with specified id
@@ -19,4 +21,11 @@ public interface UserDao {
      * @return the optional with read user from database if it exists or optional empty otherwise
      */
     Optional<User> readUserById(int id);
+
+    /**
+     * Find out amount of entries in table with users
+     *
+     * @return amount of entries in table with users
+     */
+    int countUser();
 }

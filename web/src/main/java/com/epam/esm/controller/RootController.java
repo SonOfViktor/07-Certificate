@@ -20,9 +20,8 @@ public class RootController {
 
         return rootResource.add(
                 linkTo(methodOn(RootController.class).root()).withSelfRel(),
-                linkTo(methodOn(UserController.class).showAllUsers()).withRel(USERS),
-                linkTo(methodOn(GiftCertificateController.class).showCertificateWithParameters(null))
-                        .withRel(GIFT_CERTIFICATES),
-                linkTo(methodOn(TagController.class).showAllTags()).withRel(TAGS));
+                linkTo(UserController.class).withRel(USERS),
+                linkTo(GiftCertificateController.class).withRel(GIFT_CERTIFICATES),
+                linkTo(TagController.class).withRel(TAGS));
     }
 }

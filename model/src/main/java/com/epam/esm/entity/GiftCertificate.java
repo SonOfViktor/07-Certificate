@@ -4,7 +4,6 @@ import com.epam.esm.listener.AuditListener;
 import com.epam.esm.validategroup.ForCreate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.math.BigDecimal;
@@ -55,9 +54,9 @@ public class GiftCertificate {
     public GiftCertificate() {
     }
 
-    public GiftCertificate(int id, String name, String description, BigDecimal price, int duration,
+    public GiftCertificate(int giftCertificateId, String name, String description, BigDecimal price, int duration,
                            LocalDateTime createDate, LocalDateTime lastUpdateDate) {
-        giftCertificateId = id;
+        this.giftCertificateId = giftCertificateId;
         this.name = name;
         this.description = description;
         this.price = price;

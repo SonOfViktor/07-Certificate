@@ -1,14 +1,15 @@
 package com.epam.esm.service;
 
+import com.epam.esm.entity.Page;
 import com.epam.esm.entity.User;
-
-import java.util.List;
 
 public interface UserService {
     /**
-     * Find all users
+     * Find specified page with users
      *
-     * @return list with all users
+     * @param page number of page with users
+     * @param size amount objects in one page
+     * @return page with users
      */
-    List<User> findAllUser();
+    Page<User> findAllUser(int page, int size);
 }

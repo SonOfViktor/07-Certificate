@@ -2,6 +2,7 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dto.CertificateTagsDto;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Page;
 import com.epam.esm.entity.SelectQueryParameter;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.GiftCertificateService;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -37,15 +39,15 @@ public class GiftCertificateTagDtoServiceImpl implements GiftCertificateTagDtoSe
     }
 
     @Override
-    public List<CertificateTagsDto> findAllGiftCertificateTagDto() {
-        List<GiftCertificate> certificates = giftCertificateService.findAllCertificates();
+    public Page<CertificateTagsDto> findAllGiftCertificateTagDto(int page, int size) {
+        Page<GiftCertificate> certificates = giftCertificateService.findAllCertificates(page, size);
 
         return convertCertificateListToCertificateTagsDto(certificates);
     }
 
     @Override
-    public List<CertificateTagsDto> findGiftCertificateTagDtoByParam(SelectQueryParameter params) {
-        List<GiftCertificate> certificates = giftCertificateService.findCertificatesWithParams(params);
+    public Page<CertificateTagsDto> findGiftCertificateTagDtoByParam(SelectQueryParameter params, int page, int size) {
+        Page<GiftCertificate> certificates = giftCertificateService.findCertificatesWithParams(params, page, size);
 
         return convertCertificateListToCertificateTagsDto(certificates);
     }
@@ -64,18 +66,21 @@ public class GiftCertificateTagDtoServiceImpl implements GiftCertificateTagDtoSe
 
         Set<Tag> tags = tagService.findTagsByCertificateId(id);
         tags.addAll(certificateTagsDto.tags());
-        certificate.setTags(tags);
-
         Set<Tag> updatedTags = tagService.addTags(tags);
+
+        certificate.setTags(updatedTags);
         GiftCertificate updatedCertificate = giftCertificateService.updateGiftCertificate(certificate, id);
 
         return new CertificateTagsDto(updatedCertificate, updatedTags);
     }
 
-    private List<CertificateTagsDto> convertCertificateListToCertificateTagsDto(List<GiftCertificate> certificates) {
-        return certificates.stream()
-                .map(cert ->
-                        new CertificateTagsDto(cert, tagService.findTagsByCertificateId(cert.getGiftCertificateId())))
+    private Page<CertificateTagsDto> convertCertificateListToCertificateTagsDto(Page<GiftCertificate> certificates) {
+        List<CertificateTagsDto> certificateTagsDtoList = StreamSupport
+                .stream(certificates.getEntities().spliterator(), false)
+                .map(cert -> new CertificateTagsDto(cert,
+                        tagService.findTagsByCertificateId(cert.getGiftCertificateId())))
                 .toList();
+
+        return new Page<>(certificateTagsDtoList, certificates.getPageMeta());
     }
 }

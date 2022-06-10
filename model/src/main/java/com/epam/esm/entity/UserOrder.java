@@ -1,6 +1,7 @@
 package com.epam.esm.entity;
 
 import com.epam.esm.listener.AuditListener;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Positive;
@@ -20,10 +21,12 @@ public class UserOrder {
     @Digits(integer = 3, fraction = 2)
     private BigDecimal cost;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "gift_certificate_id")
     private GiftCertificate giftCertificate;

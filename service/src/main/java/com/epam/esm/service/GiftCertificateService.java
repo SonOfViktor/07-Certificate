@@ -1,10 +1,9 @@
 package com.epam.esm.service;
 
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Page;
 import com.epam.esm.entity.SelectQueryParameter;
 import com.epam.esm.exception.ResourceNotFoundException;
-
-import java.util.List;
 
 /**
  * The interface provide methods to control business logic related with gift certificates
@@ -19,20 +18,25 @@ public interface GiftCertificateService {
     GiftCertificate addGiftCertificate(GiftCertificate certificate);
 
     /**
-     * Find all gift certificates.
+     * Find gift certificates for specified page.
      *
-     * @return the list with all gift certificates
+     * @param page number of page with gift certificates
+     * @param size amount objects in one page
+     * @return the page with gift certificates
+     * @throws ResourceNotFoundException if page with gift certificates doesn't exist
      */
-    List<GiftCertificate> findAllCertificates();
+    Page<GiftCertificate> findAllCertificates(int page, int size);
 
     /**
-     * Find gift certificates according to specified parameters.
+     * Find gift certificates for specified page according to specified parameters.
      *
      * @param params the parameters determinant search for gift certificates
+     * @param page number of page with gift certificates
+     * @param size amount objects in one page
      * @return the list with gift certificates according to specified parameters
-     * @throws ResourceNotFoundException if gift certificates wasn't found
+     * @throws ResourceNotFoundException if page with gift certificates doesn't exist
      */
-    List<GiftCertificate> findCertificatesWithParams(SelectQueryParameter params);
+    Page<GiftCertificate> findCertificatesWithParams(SelectQueryParameter params, int page, int size);
 
     /**
      * Find gift certificate with specified id.

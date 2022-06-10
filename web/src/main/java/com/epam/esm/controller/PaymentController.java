@@ -3,9 +3,9 @@ package com.epam.esm.controller;
 import com.epam.esm.assembler.OrderModelAssembler;
 import com.epam.esm.assembler.PaymentModelAssembler;
 import com.epam.esm.dto.PaymentDto;
+import com.epam.esm.entity.Page;
 import com.epam.esm.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,6 @@ import javax.validation.constraints.Positive;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Validated
 @RestController
@@ -37,16 +36,20 @@ public class PaymentController {
     public EntityModel<PaymentDto> showPayment(@PathVariable @Positive int paymentId) {
         PaymentDto payment = paymentService.findPayment(paymentId);
 
-        return paymentAssembler.toModel(payment);
+        return paymentAssembler.toModel(payment)
+                .add(linkTo(UserController.class).withRel(USERS));
     }
 
     @GetMapping("/{paymentId}/orders")
-    public CollectionModel<EntityModel<PaymentDto.UserOrderDto>> showPaymentOrder(@PathVariable @Positive int paymentId) {
-        PaymentDto payment = paymentService.findPayment(paymentId);
+    public Page<EntityModel<PaymentDto.UserOrderDto>> showPaymentOrder(
+            @PathVariable @Positive Integer paymentId,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size) {
 
-        return orderAssembler.toCollectionModel(payment.userOrderDtoList())
-                .add(linkTo(methodOn(PaymentController.class).showPaymentOrder(paymentId)).withSelfRel())
-                .add(linkTo(methodOn(UserController.class).showAllUsers()).withRel(USERS));
+        Page<PaymentDto.UserOrderDto> userOrders = paymentService.findUserOrderByPaymentId(paymentId, page, size);
+
+        return orderAssembler.toPageModel(userOrders)
+                .add(linkTo(UserController.class).withRel(USERS));
     }
 
     @PostMapping("/user/{userId}")
@@ -54,6 +57,7 @@ public class PaymentController {
                                                  @RequestBody @NotEmpty List<@Positive Integer> certificateIdList) {
         PaymentDto payment = paymentService.addPayment(userId, certificateIdList);
 
-        return paymentAssembler.toModel(payment);
+        return paymentAssembler.toModel(payment)
+                .add(linkTo(UserController.class).withRel(USERS));
     }
 }

@@ -2,6 +2,8 @@ package com.epam.esm.assembler;
 
 import com.epam.esm.controller.PaymentController;
 import com.epam.esm.dto.PaymentDto;
+import com.epam.esm.entity.Page;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.lang.NonNull;
@@ -20,6 +22,12 @@ public class PaymentModelAssembler implements RepresentationModelAssembler<Payme
 
         return EntityModel.of(entity,
                 linkTo(methodOn(PaymentController.class).showPayment(entity.id())).withSelfRel(),
-                linkTo(methodOn(PaymentController.class).showPaymentOrder(entity.id())).withRel(ORDERS));
+                linkTo(PaymentController.class).slash(entity.id()).slash(ORDERS).withRel(ORDERS));
+    }
+
+    public Page<EntityModel<PaymentDto>> toPageModel(Page<PaymentDto> payments) {
+
+        CollectionModel<EntityModel<PaymentDto>> entityModels = toCollectionModel(payments.getEntities());
+        return new Page<>(entityModels, payments.getPageMeta());
     }
 }

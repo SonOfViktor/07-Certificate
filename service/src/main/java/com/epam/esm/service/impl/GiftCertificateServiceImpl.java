@@ -2,6 +2,8 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Page;
+import com.epam.esm.entity.PageMeta;
 import com.epam.esm.entity.SelectQueryParameter;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.GiftCertificateService;
@@ -28,20 +30,23 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificate> findAllCertificates() {
-        return giftCertificateDao.readAllCertificate();
+    public Page<GiftCertificate> findAllCertificates(int page, int size) {
+        PageMeta pageMeta = createPageMeta(page, size, null);
+
+        int offset = page * size - size;
+        List<GiftCertificate> certificates = giftCertificateDao.readAllCertificate(offset, size);
+
+        return new Page<>(certificates, pageMeta);
     }
 
     @Override
-    public List<GiftCertificate> findCertificatesWithParams(SelectQueryParameter params) {
-        List<GiftCertificate> certificates = giftCertificateDao.readGiftCertificateWithParam(params);
+    public Page<GiftCertificate> findCertificatesWithParams(SelectQueryParameter params, int page, int size) {
+        PageMeta pageMeta = createPageMeta(page, size, params);
 
-        if(certificates.isEmpty()) {
-            throw new ResourceNotFoundException("There is no certificates with such parameters " + params +
-                    " in database");
-        }
+        int offset = page * size - size;
+        List<GiftCertificate> certificates = giftCertificateDao.readGiftCertificateWithParam(params, offset, size);
 
-        return certificates;
+        return new Page<>(certificates, pageMeta);
     }
 
     @Override
@@ -71,5 +76,16 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         }
 
         return affectedRow;
+    }
+
+    private PageMeta createPageMeta(int page, int size, SelectQueryParameter params) {
+        int giftCertificatesTotalElements = giftCertificateDao.countGiftCertificate(params);
+        int totalPages = (int) Math.ceil((double) giftCertificatesTotalElements / size);
+
+        if (page > totalPages) {
+            throw new ResourceNotFoundException("There is no certificates in the database on " + page + " page");
+        }
+
+        return new PageMeta(size, giftCertificatesTotalElements, totalPages, page);
     }
 }
