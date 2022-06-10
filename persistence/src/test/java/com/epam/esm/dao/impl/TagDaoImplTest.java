@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @Transactional
 class TagDaoImplTest {
-    public static final String MODULE_TWO_TAG = "module_two.tag";
+    public static final String MODULE_TWO_TAG = "module_3.tags";
     private TagDao tagDao;
     private JdbcTemplate jdbcTemplate;
 
@@ -43,6 +43,7 @@ class TagDaoImplTest {
 
     @Order(0)
     @Test
+    @Disabled("GiftCertificateDaoTest impact on id of tags")
     void testCreateTag() {
         Tag tag = new Tag("piece");
         int actual = tagDao.createTag(tag).getTagId();
@@ -58,6 +59,7 @@ class TagDaoImplTest {
 
     @Order(1)
     @Test
+    @Disabled("GiftCertificateDaoTest impact on id of tags")
     void addTags() {
         Set<Tag> tags = Set.of(new Tag("food"), new Tag("business"), new Tag("shopping"));
 
@@ -110,6 +112,14 @@ class TagDaoImplTest {
     void testReadNonexistentTag() {
         Tag expected = new Tag(3, "shoe");
         Tag actual = tagDao.readTag(3).get();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testReadMostPopularHighestPriceTag() {
+        List<Tag> expected = List.of(new Tag(2, "stationery"), new Tag(5, "paper"), new Tag(6, "by"));
+        List<Tag> actual = tagDao.readMostPopularHighestPriceTag();
+
         assertEquals(expected, actual);
     }
 

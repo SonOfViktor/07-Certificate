@@ -1,10 +1,13 @@
 package com.epam.esm.dao.impl;
 
 import com.epam.esm.dao.TagDao;
-import com.epam.esm.entity.Tag;
+import com.epam.esm.dao.criteria.SubqueryMostUsedHighestPriceTagMaker;
+import com.epam.esm.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.*;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,10 +26,12 @@ public class TagDaoImpl implements TagDao {
     public static final String ID = "id";
 
     private final EntityManager entityManager;
+    private final SubqueryMostUsedHighestPriceTagMaker subqueryTagMaker;
 
     @Autowired
-    public TagDaoImpl(EntityManager entityManager) {
+    public TagDaoImpl(EntityManager entityManager, SubqueryMostUsedHighestPriceTagMaker subqueryTagMaker) {
         this.entityManager = entityManager;
+        this.subqueryTagMaker = subqueryTagMaker;
     }
 
     @Override
@@ -69,6 +74,28 @@ public class TagDaoImpl implements TagDao {
                 .getResultList();
 
         return (!tags.isEmpty()) ? Optional.of(tags.get(0)) : Optional.empty();
+    }
+
+    public List<Tag> readMostPopularHighestPriceTag() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> criteria = criteriaBuilder.createQuery(Tag.class);
+
+        Subquery<BigDecimal> maxPrice = subqueryTagMaker.createMaxPriceSubquery(criteriaBuilder, criteria);
+        Subquery<Long> tagCount = subqueryTagMaker.createTagCountWithMaxPriceSubquery(criteriaBuilder, criteria, maxPrice);
+
+        Root<Tag> tag = criteria.from(Tag.class);
+        ListJoin<Tag, GiftCertificate> giftCertificate = tag.join(Tag_.giftCertificates);
+        ListJoin<GiftCertificate, UserOrder> userOrder = giftCertificate.join(GiftCertificate_.userOrders);
+
+        criteria.select(tag)
+                .where(criteriaBuilder.equal(userOrder.get(UserOrder_.cost), maxPrice))
+                .groupBy(tag.get(Tag_.tagId), tag.get(Tag_.name))
+                .having(
+                        criteriaBuilder.greaterThanOrEqualTo(
+                                criteriaBuilder.count(tag.get(Tag_.name)), criteriaBuilder.all(tagCount))
+                );
+
+        return entityManager.createQuery(criteria).getResultList();
     }
 
     @Override

@@ -14,11 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
-import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
@@ -37,8 +35,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 @ActiveProfiles("test")
 @Transactional
 class GiftCertificateDaoImplTest {
-    public static final String GIFT_CERTIFICATE_TABLE = "module_two.gift_certificate";
-    public static final String GIFT_CERTIFICATE_TAG_TABLE = "module_two.gift_certificate_tag";
+    public static final String GIFT_CERTIFICATE_TABLE = "module_3.gift_certificates";
+    public static final String GIFT_CERTIFICATE_TAG_TABLE = "module_3.gift_certificate_tag";
     private final GiftCertificateDao giftCertificateDao;
     private final TagDao tagDao;
     private final JdbcTemplate jdbcTemplate;
@@ -78,7 +76,6 @@ class GiftCertificateDaoImplTest {
 
     @Order(1)
     @Test
-    @Disabled("insert tag impact TagDaoImplTest")
     void testCreateGiftCertificateWithTags() {
         Set<Tag> tags = Set.of(new Tag("name"), new Tag("food"));
         tagDao.addTags(tags);
@@ -96,7 +93,7 @@ class GiftCertificateDaoImplTest {
         entityManager.flush();
 
         int actualTableRows = JdbcTestUtils.countRowsInTable(jdbcTemplate, GIFT_CERTIFICATE_TAG_TABLE);
-        int expectedTableRows = 16;
+        int expectedTableRows = 15;
 
         assertEquals(expectedId, actualId);
         assertEquals(expectedTableRows, actualTableRows);
@@ -140,7 +137,6 @@ class GiftCertificateDaoImplTest {
     }
 
     @Test
-    @Disabled("insert tag impact TagDaoImplTest")
     void testUpdateGiftCertificateWithTags() {
         Tag newTag = new Tag("name");
         tagDao.createTag(newTag);
@@ -155,7 +151,7 @@ class GiftCertificateDaoImplTest {
         entityManager.flush();
 
         int actualTableRows = JdbcTestUtils.countRowsInTable(jdbcTemplate, GIFT_CERTIFICATE_TAG_TABLE);
-        int expectedTableRows = 15;
+        int expectedTableRows = 14;
 
         assertEquals(expectedTableRows, actualTableRows);
     }
@@ -232,22 +228,32 @@ class GiftCertificateDaoImplTest {
 
     Stream<Arguments> stringQueryAndResult() {
         return Stream.of(
-                arguments(new SelectQueryParameter("paper", "e", "two", ASC, null),
+                arguments(new SelectQueryParameter(List.of("paper"), "e", "two", ASC, null),
                         createAllCertificateList().stream()
                                 .filter(certificate -> certificate.getGiftCertificateId() > 1)
                                 .sorted(Comparator.comparing(GiftCertificate::getName))
                                 .toList()),
-                arguments(new SelectQueryParameter("paper", "e", "two", null, DESC),
+                arguments(new SelectQueryParameter(List.of("paper"), "e", "two", null, DESC),
                         createAllCertificateList().stream()
                                 .filter(certificate -> certificate.getGiftCertificateId() > 1)
                                 .sorted(Comparator.comparing(GiftCertificate::getCreateDate).reversed())
                                 .toList()),
-                arguments(new SelectQueryParameter("paper", "e", null, null, null),
+                arguments(new SelectQueryParameter(List.of("paper", "stationery", "by"), "e", null, null, DESC),
+                        createAllCertificateList().stream()
+                                .filter(certificate -> certificate.getGiftCertificateId() > 2)
+                                .sorted(Comparator.comparing(GiftCertificate::getCreateDate).reversed())
+                                .toList()),
+                arguments(new SelectQueryParameter(List.of("paper"), "e", null, null, null),
                         createAllCertificateList().stream()
                                 .filter(certificate -> certificate.getGiftCertificateId() > 1)
                                 .sorted(Comparator.comparing(GiftCertificate::getName))
                                 .toList()),
                 arguments(new SelectQueryParameter(null, "e", null, ASC, ASC),
+                        createAllCertificateList().stream()
+                                .filter(certificate -> certificate.getGiftCertificateId() > 1)
+                                .sorted(Comparator.comparing(GiftCertificate::getName).thenComparing(GiftCertificate::getCreateDate))
+                                .toList()),
+                arguments(new SelectQueryParameter(Collections.emptyList(), "e", null, ASC, ASC),
                         createAllCertificateList().stream()
                                 .filter(certificate -> certificate.getGiftCertificateId() > 1)
                                 .sorted(Comparator.comparing(GiftCertificate::getName).thenComparing(GiftCertificate::getCreateDate))

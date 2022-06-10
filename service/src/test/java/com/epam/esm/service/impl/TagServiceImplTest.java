@@ -1,27 +1,19 @@
-package com.epam.esm.impl;
+package com.epam.esm.service.impl;
 
-import com.epam.esm.ServiceApplication;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.service.impl.TagServiceImpl;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(classes = ServiceApplication.class)
-@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class TagServiceImplTest {
     Set<Tag> tags;
@@ -32,8 +24,8 @@ class TagServiceImplTest {
     @Mock
     TagDao tagDao;
 
-    @BeforeAll
-    void beforeAll() {
+    @BeforeEach
+    void init() {
         tags = Set.of(new Tag(1, "food"), new Tag("summer"));
     }
 
@@ -91,6 +83,16 @@ class TagServiceImplTest {
         Tag actual = tagService.findTagById(1);
 
         assertEquals(tag, actual);
+    }
+
+    @Test
+    void testFind() {
+        List<Tag> expected = List.of(new Tag(2, "stationery"), new Tag(6, "by"));
+        when(tagDao.readMostPopularHighestPriceTag()).thenReturn(expected);
+
+        List<Tag> actual = tagService.findMostPopularHighestPriceTag();
+
+        assertEquals(actual, expected);
     }
 
     @Test

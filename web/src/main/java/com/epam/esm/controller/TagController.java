@@ -31,6 +31,11 @@ public class TagController {
         return tagService.findTagById(id);
     }
 
+    @GetMapping("/highest")
+    public List<Tag> showMostPopularHighestPriceTag() {
+        return tagService.findMostPopularHighestPriceTag();
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Tag addTag(@Valid @RequestBody Tag tag) {

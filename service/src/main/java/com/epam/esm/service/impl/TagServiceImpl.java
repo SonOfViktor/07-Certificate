@@ -48,6 +48,11 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    public List<Tag> findMostPopularHighestPriceTag() {
+        return tagDao.readMostPopularHighestPriceTag();
+    }
+
+    @Override
     public int deleteTag(int tagId) {
         int affectedRow = tagDao.deleteTag(tagId);
 

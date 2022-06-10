@@ -50,6 +50,13 @@ public interface TagDao {
     Optional<Tag> readTag(int id);
 
     /**
+     * Read the most widely used tag of a user with the highest cost of all orders
+     *
+     * @return list of most widely used tag with the highest cost
+     */
+    List<Tag> readMostPopularHighestPriceTag();
+
+    /**
      * Delete tag from database.
      *
      * @param id the id of deleted tag

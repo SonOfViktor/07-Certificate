@@ -49,7 +49,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         Optional<GiftCertificate> certificateOptional = giftCertificateDao.readGiftCertificate(certificateId);
 
         return certificateOptional.orElseThrow(() ->
-                new ResourceNotFoundException("There is no certificate with Id" + certificateId + " in database"));
+                new ResourceNotFoundException("There is no certificate with Id " + certificateId + " in database"));
     }
 
     @Override

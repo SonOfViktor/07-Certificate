@@ -1,23 +1,15 @@
-package com.epam.esm.impl;
+package com.epam.esm.service.impl;
 
-import com.epam.esm.ServiceApplication;
 import com.epam.esm.dto.CertificateTagsDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.SelectQueryParameter;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.service.impl.GiftCertificateServiceImpl;
-import com.epam.esm.service.impl.GiftCertificateTagDtoServiceImpl;
-import com.epam.esm.service.impl.TagServiceImpl;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -26,9 +18,6 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(classes = ServiceApplication.class)
-@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class GiftCertificateTagDtoServiceImplTest {
     private List<GiftCertificate> giftCertificateList;
@@ -44,8 +33,8 @@ class GiftCertificateTagDtoServiceImplTest {
     @Mock
     private TagServiceImpl tagService;
 
-    @BeforeAll
-    void beforeAll() {
+    @BeforeEach
+    void init() {
         giftCertificateList = List.of(new GiftCertificate(), new GiftCertificate());
         giftCertificateList.get(0).setGiftCertificateId(1);
         giftCertificateList.get(1).setGiftCertificateId(2);

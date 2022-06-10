@@ -1,5 +1,6 @@
 package com.epam.esm.entity;
 
+import com.epam.esm.listener.AuditListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -8,11 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Table(name = "tag", schema = "module_two")
 @Entity
+@Table(name = "tags", schema = "module_3")
+@EntityListeners(AuditListener.class)
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int tagId;
 
     @NotNull
