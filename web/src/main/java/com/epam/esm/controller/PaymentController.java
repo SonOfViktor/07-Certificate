@@ -9,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
-import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -49,15 +47,6 @@ public class PaymentController {
         Page<PaymentDto.UserOrderDto> userOrders = paymentService.findUserOrderByPaymentId(paymentId, page, size);
 
         return orderAssembler.toPageModel(userOrders)
-                .add(linkTo(UserController.class).withRel(USERS));
-    }
-
-    @PostMapping("/user/{userId}")
-    public EntityModel<PaymentDto> createPayment(@PathVariable @Positive int userId,
-                                                 @RequestBody @NotEmpty List<@Positive Integer> certificateIdList) {
-        PaymentDto payment = paymentService.addPayment(userId, certificateIdList);
-
-        return paymentAssembler.toModel(payment)
                 .add(linkTo(UserController.class).withRel(USERS));
     }
 }

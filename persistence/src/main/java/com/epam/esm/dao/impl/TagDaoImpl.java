@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.math.NumberUtils.INTEGER_ZERO;
+
 @Repository
 public class TagDaoImpl implements TagDao {
 
@@ -22,7 +24,6 @@ public class TagDaoImpl implements TagDao {
                     where cert.giftCertificateId = :id
                     order by tag.tagId
             """;
-    public static final String DELETE_TAG_BY_ID_HQL = "delete from Tag tag where tag.tagId = :id";
     public static final String SELECT_TAG_BY_NAME_HQL = "select t from Tag t where t.name = :name";
     public static final String TAG_NAME = "name";
     public static final String ID = "id";
@@ -135,9 +136,15 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public int deleteTag(int id) {
-        return entityManager.createQuery(DELETE_TAG_BY_ID_HQL)
-                .setParameter(ID, id)
-                .executeUpdate();
+        int deletedTagId = INTEGER_ZERO;
+        Tag tag = entityManager.find(Tag.class, id);
+
+        if(tag != null) {
+            entityManager.remove(tag);
+            deletedTagId = tag.getTagId();
+        }
+
+        return deletedTagId;
     }
 
     private TypedQuery<Tag> createTagByCertificateIdQuery(int certificateId) {

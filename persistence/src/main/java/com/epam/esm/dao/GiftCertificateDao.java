@@ -64,7 +64,7 @@ public interface GiftCertificateDao {
      * Delete gift certificate with specified id.
      *
      * @param id the id of deleted gift certificate
-     * @return 1 if specified gift certificate was deleted, 0 otherwise
+     * @return deleted certificate id if it was deleted, 0 otherwise
      */
     int deleteGiftCertificate(int id);
 }

@@ -14,6 +14,7 @@ import com.epam.esm.validategroup.ForCreate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
@@ -21,13 +22,18 @@ import javax.validation.constraints.Positive;
 import javax.validation.groups.Default;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/certificates")
 @Validated
 public class GiftCertificateController {
     public static final String ALL_GIFT_CERTIFICATES = "all_gift_certificates";
+    public static final String CERTIFICATE = "certificate";
     public static final String USERS = "users";
+    public static final String CREATE = "create";
+    public static final String UPDATE = "update";
+    public static final String DELETE = "delete";
     private final GiftCertificateTagDtoService certificateTagService;
     private final TagService tagService;
     private final GiftCertificateService certificateService;
@@ -49,7 +55,9 @@ public class GiftCertificateController {
         CertificateTagsDto giftCertificateTagDto = certificateTagService.findGiftCertificateTagDto(id);
 
         return certificateAssembler.toModel(giftCertificateTagDto)
-                .add(linkTo(GiftCertificateController.class).withRel(ALL_GIFT_CERTIFICATES));
+                .add(linkTo(GiftCertificateController.class).withRel(ALL_GIFT_CERTIFICATES))
+                .add(linkTo(methodOn(GiftCertificateController.class).updateCertificate(null, id)).withRel(UPDATE))
+                .add(linkTo(methodOn(GiftCertificateController.class).deleteCertificate(id)).withRel(DELETE));
     }
 
     @GetMapping("/{id}/tags")
@@ -60,7 +68,8 @@ public class GiftCertificateController {
 
         Page<Tag> tags = tagService.findTagsByCertificateId(id, page, size);
 
-        return tagAssembler.toPageModel(tags);
+        return tagAssembler.toPageModel(tags)
+                .add(linkTo(methodOn(GiftCertificateController.class).showCertificate(id)).withRel(CERTIFICATE));
     }
 
     @PostMapping
@@ -74,7 +83,8 @@ public class GiftCertificateController {
                 certificateTagService.findGiftCertificateTagDtoByParam(queryParam, page, size);
 
         return certificateAssembler.toPageModel(certificates)
-                .add(linkTo(UserController.class).withRel(USERS));
+                .add(linkTo(UserController.class).withRel(USERS))
+                .add(linkTo(methodOn(GiftCertificateController.class).addCertificate(null)).withRel(CREATE));
     }
 
     @PostMapping("/creating")
@@ -100,8 +110,9 @@ public class GiftCertificateController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCertificate(@PathVariable @Positive int id) {
+    public ResponseEntity<Object> deleteCertificate(@PathVariable @Positive int id) {
         certificateService.deleteCertificate(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

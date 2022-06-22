@@ -1,8 +1,10 @@
 package com.epam.esm.dao.impl;
 
-import com.epam.esm.dao.criteria.CriteriaParameterMaker;
 import com.epam.esm.dao.GiftCertificateDao;
-import com.epam.esm.entity.*;
+import com.epam.esm.dao.criteria.CriteriaParameterMaker;
+import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.GiftCertificate_;
+import com.epam.esm.entity.SelectQueryParameter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.math.NumberUtils.INTEGER_ZERO;
+
 @Repository
 public class GiftCertificateDaoImpl implements GiftCertificateDao {
     public static final String SELECT_ALL_GIFT_CERTIFICATES_HQL = """
@@ -19,9 +23,6 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
             order by cert.giftCertificateId
             """;
     public static final String SELECT_COUNT_ALL_GIFT_CERTIFICATES_HQL = "select count(cert) from GiftCertificate cert";
-    public static final String DELETE_GIFT_CERTIFICATE_BY_ID_HQL =
-            "delete from GiftCertificate cert where cert.giftCertificateId = :id";
-    public static final String ID_PARAMETER = "id";
 
     private final EntityManager entityManager;
     private final CriteriaParameterMaker criteriaParameterMaker;
@@ -95,9 +96,15 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
     @Override
     public int deleteGiftCertificate(int id) {
-        return entityManager.createQuery(DELETE_GIFT_CERTIFICATE_BY_ID_HQL)
-                .setParameter(ID_PARAMETER, id)
-                .executeUpdate();
+        int deletedCertificateId = INTEGER_ZERO;
+        GiftCertificate certificate = entityManager.find(GiftCertificate.class, id);
+
+        if (certificate != null) {
+            entityManager.remove(certificate);
+            deletedCertificateId = certificate.getGiftCertificateId();
+        }
+
+        return deletedCertificateId;
     }
 
     private GiftCertificate fillCertificateNewValues(GiftCertificate updatedCertificate, GiftCertificate updatingCertificate) {

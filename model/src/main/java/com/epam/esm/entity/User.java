@@ -29,13 +29,13 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Payment> payments;
 
+    public User() {
+    }
+
     public User(int userId, String firstName, String lastName) {
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
-    }
-
-    public User() {
     }
 
     public int getUserId() {
@@ -44,6 +44,14 @@ public class User {
 
     public String getFirstName() {
         return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getLastName() {
