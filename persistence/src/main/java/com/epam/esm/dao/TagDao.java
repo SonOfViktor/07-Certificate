@@ -81,7 +81,7 @@ public interface TagDao {
      * Delete tag from database.
      *
      * @param id the id of deleted tag
-     * @return 1 if specified gift certificate was deleted, 0 otherwise
+     * @return deleted tag id if it was deleted, 0 otherwise
      */
     int deleteTag(int id);
 }

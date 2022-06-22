@@ -3,11 +3,10 @@ package com.epam.esm;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = WebApplication.class)
 class WebApplicationTests {
 
     @Test
     void contextLoads() {
     }
-
 }

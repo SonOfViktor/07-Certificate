@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
@@ -24,6 +25,8 @@ public class TagController {
     public static final String ALL_TAGS = "all_tags";
     public static final String POPULAR_TAGS = "popular_tags";
     public static final String ALL_GIFT_CERTIFICATES = "all_gift_certificates";
+    public static final String CREATE = "create";
+    public static final String DELETE = "delete";
     private final TagService tagService;
     private final TagModelAssembler tagAssembler;
 
@@ -35,12 +38,13 @@ public class TagController {
 
     @GetMapping
     public Page<EntityModel<Tag>> showAllTags(@RequestParam(required = false, defaultValue = "1") Integer page,
-                                              @RequestParam(required = false, defaultValue = "5") Integer limit) {
+                                              @RequestParam(required = false, defaultValue = "10") Integer limit) {
         Page<Tag> tags = tagService.findAllTags(page, limit);
 
         return tagAssembler.toPageModel(tags)
                 .add(linkTo(methodOn(TagController.class).showMostPopularHighestPriceTag()).withRel(POPULAR_TAGS))
-                .add(linkTo(GiftCertificateController.class).withRel(ALL_GIFT_CERTIFICATES));
+                .add(linkTo(GiftCertificateController.class).withRel(ALL_GIFT_CERTIFICATES))
+                .add(linkTo(methodOn(TagController.class).addTag(null)).withRel(CREATE));
     }
 
     @GetMapping("/{id}")
@@ -48,7 +52,8 @@ public class TagController {
         Tag tag = tagService.findTagById(id);
 
         return tagAssembler.toModel(tag)
-                .add(linkTo(TagController.class).withRel(ALL_TAGS));
+                .add(linkTo(TagController.class).withRel(ALL_TAGS))
+                .add(linkTo(methodOn(TagController.class).deleteTag(tag.getTagId())).withRel(DELETE));
     }
 
     @GetMapping("/highest")
@@ -71,8 +76,9 @@ public class TagController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTag(@PathVariable @Positive int id) {
+    public ResponseEntity<Object> deleteTag(@PathVariable @Positive int id) {
         tagService.deleteTag(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

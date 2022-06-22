@@ -193,13 +193,14 @@ class GiftCertificateDaoImplTest {
 
     @Test
     void testDeleteGiftCertificate() {
-        int expectedAffectedRow = 1;
+        int expectedDeletedCertificateId = 3;
         int expectedCountRow = 3;
 
         int actualAffectedRow = giftCertificateDao.deleteGiftCertificate(3);
+        entityManager.flush();
         int actualCountRow = JdbcTestUtils.countRowsInTable(jdbcTemplate, GIFT_CERTIFICATE_TABLE);
 
-        assertEquals(expectedAffectedRow, actualAffectedRow);
+        assertEquals(expectedDeletedCertificateId, actualAffectedRow);
         assertEquals(expectedCountRow, actualCountRow);
     }
 

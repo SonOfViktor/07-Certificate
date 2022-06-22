@@ -1,5 +1,6 @@
 package com.epam.esm.aspect;
 
+import com.epam.esm.controller.RootController;
 import com.epam.esm.entity.Page;
 import com.epam.esm.entity.SelectQueryParameter;
 import org.aspectj.lang.JoinPoint;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 @Aspect
@@ -20,6 +22,7 @@ public class PageAspect {
     public static final String FIRST = "first";
     public static final String NEXT = "next";
     public static final String LAST = "last";
+    public static final String ROOT = "root";
 
     @Pointcut("execution(*..Page<*> com.epam.esm.controller.*.*(..))")
     public void showPageMethodPointcut() {
@@ -37,7 +40,8 @@ public class PageAspect {
                         () -> linkTo(controllerClass, controllerMethod, page - 1, size).withRel(PREVIOUS))
                 .addIf(page < result.getPageMeta().getTotalPages(),
                         () -> linkTo(controllerClass, controllerMethod, page + 1, size).withRel(NEXT))
-                .add(linkTo(controllerClass, controllerMethod, result.getPageMeta().getTotalPages(), size).withRel(LAST));
+                .add(linkTo(controllerClass, controllerMethod, result.getPageMeta().getTotalPages(), size).withRel(LAST))
+                .add(linkTo(methodOn(RootController.class).root()).withRel(ROOT));
 
     }
 
@@ -55,7 +59,8 @@ public class PageAspect {
                         () -> linkTo(controllerClass, controllerMethod, id, page - 1, size).withRel(PREVIOUS))
                 .addIf(page < result.getPageMeta().getTotalPages(),
                         () -> linkTo(controllerClass, controllerMethod, id, page + 1, size).withRel(NEXT))
-                .add(linkTo(controllerClass, controllerMethod, id, result.getPageMeta().getTotalPages(), size).withRel(LAST));
+                .add(linkTo(controllerClass, controllerMethod, id, result.getPageMeta().getTotalPages(), size).withRel(LAST))
+                .add(linkTo(methodOn(RootController.class).root()).withRel(ROOT));
 
     }
 
@@ -73,7 +78,8 @@ public class PageAspect {
                         () -> linkTo(controllerClass, controllerMethod, params, page - 1, size).withRel(PREVIOUS))
                 .addIf(page < result.getPageMeta().getTotalPages(),
                         () -> linkTo(controllerClass, controllerMethod, params, page + 1, size).withRel(NEXT))
-                .add(linkTo(controllerClass, controllerMethod, params, result.getPageMeta().getTotalPages(), size).withRel(LAST));
+                .add(linkTo(controllerClass, controllerMethod, params, result.getPageMeta().getTotalPages(), size).withRel(LAST))
+                .add(linkTo(methodOn(RootController.class).root()).withRel(ROOT));
     }
 
 

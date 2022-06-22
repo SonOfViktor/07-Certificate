@@ -11,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
+
+import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -21,6 +24,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/users")
 public class UserController {
     public static final String USERS = "users";
+    public static final String CREATE = "create";
     private final UserService userService;
     private final PaymentService paymentService;
     private final UserModelAssembler userAssembler;
@@ -54,6 +58,16 @@ public class UserController {
         Page<PaymentDto> paymentsByUserId = paymentService.findPaymentsByUserId(userId, page, size);
 
         return paymentAssembler.toPageModel(paymentsByUserId)
-                .add(linkTo(methodOn(UserController.class).showAllUsers(page, size)).withRel(USERS));
+                .add(linkTo(methodOn(UserController.class).showAllUsers(page, size)).withRel(USERS))
+                .add(linkTo(methodOn(UserController.class).createPayment(userId, null)).withRel(CREATE));
+    }
+
+    @PostMapping("/{userId}/payments")
+    public EntityModel<PaymentDto> createPayment(@PathVariable @Positive int userId,
+                                                 @RequestBody @NotEmpty List<@Positive Integer> certificateIdList) {
+        PaymentDto payment = paymentService.addPayment(userId, certificateIdList);
+
+        return paymentAssembler.toModel(payment)
+                .add(linkTo(UserController.class).withRel(USERS));
     }
 }

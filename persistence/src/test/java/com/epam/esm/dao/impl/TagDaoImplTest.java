@@ -10,11 +10,13 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -25,11 +27,13 @@ class TagDaoImplTest {
     public static final String MODULE_TWO_TAG = "module_3.tags";
     private TagDao tagDao;
     private JdbcTemplate jdbcTemplate;
+    private final EntityManager entityManager;
 
     @Autowired
-    public TagDaoImplTest(TagDao tagDao, JdbcTemplate jdbcTemplate) {
+    public TagDaoImplTest(TagDao tagDao, JdbcTemplate jdbcTemplate, EntityManager entityManager) {
         this.tagDao = tagDao;
         this.jdbcTemplate = jdbcTemplate;
+        this.entityManager = entityManager;
     }
 
     @Test
@@ -162,6 +166,7 @@ class TagDaoImplTest {
     @Test
     void testDeleteTag() {
         tagDao.deleteTag(6);
+        entityManager.flush();
         int actual = JdbcTestUtils.countRowsInTable(jdbcTemplate, MODULE_TWO_TAG);
         int expected = 5;
         assertEquals(expected, actual);
