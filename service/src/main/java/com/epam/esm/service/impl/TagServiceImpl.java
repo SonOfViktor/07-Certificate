@@ -6,20 +6,16 @@ import com.epam.esm.entity.PageMeta;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
+@RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
     private final TagDao tagDao;
-
-    @Autowired
-    public TagServiceImpl(TagDao tagDao) {
-        this.tagDao = tagDao;
-    }
 
     @Override
     public Tag addTag(Tag tag) {

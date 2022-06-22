@@ -8,7 +8,7 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.GiftCertificateTagDtoService;
 import com.epam.esm.service.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
@@ -16,15 +16,10 @@ import java.util.stream.StreamSupport;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
+@RequiredArgsConstructor
 public class GiftCertificateTagDtoServiceImpl implements GiftCertificateTagDtoService {
     private final GiftCertificateService giftCertificateService;
     private final TagService tagService;
-
-    @Autowired
-    public GiftCertificateTagDtoServiceImpl(GiftCertificateService giftCertificateService, TagService tagService) {
-        this.giftCertificateService = giftCertificateService;
-        this.tagService = tagService;
-    }
 
     @Override
     public CertificateTagsDto addGiftCertificateTagDto(CertificateTagsDto certificateTagsDto) {

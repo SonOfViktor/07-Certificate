@@ -60,20 +60,20 @@ class PaymentDaoImplTest {
     void testCreatePayment() {
         User user = new User(1, "Ivan", "Pupkin");
         GiftCertificate giftCertificate =
-                new GiftCertificate.GiftCertificateBuilder().setGiftCertificateId(4).createGiftCertificate();
-        UserOrder order1 = new UserOrder.UserOrderBuilder()
-                .setCost(new BigDecimal("20"))
-                .setGiftCertificate(giftCertificate)
-                .createUserOrder();
-        UserOrder order2 = new UserOrder.UserOrderBuilder()
-                .setCost(new BigDecimal("30"))
-                .setGiftCertificate(giftCertificate)
-                .createUserOrder();
-        Payment payment = new Payment.PaymentBuilder()
-                .setCreatedDate(LocalDateTime.now())
-                .setUser(user)
-                .setUserOrder(List.of(order1, order2))
-                .createPayment();
+                GiftCertificate.builder().giftCertificateId(4).build();
+        UserOrder order1 = UserOrder.builder()
+                .cost(new BigDecimal("20"))
+                .giftCertificate(giftCertificate)
+                .build();
+        UserOrder order2 = UserOrder.builder()
+                .cost(new BigDecimal("30"))
+                .giftCertificate(giftCertificate)
+                .build();
+        Payment payment = Payment.builder()
+                .createdDate(LocalDateTime.now())
+                .user(user)
+                .build();
+        payment.setOrders(List.of(order1, order2));
 
         paymentDao.createPayment(payment);
         entityManager.flush();
@@ -87,36 +87,36 @@ class PaymentDaoImplTest {
 
     @Test
     void testReadPayment() {
-        GiftCertificate certificate = new GiftCertificate.GiftCertificateBuilder()
-                .setGiftCertificateId(4)
-                .setName("Evroopt")
-                .setDescription("Buy two bananas")
-                .setPrice(new BigDecimal("20.00"))
-                .setDuration(10)
-                .setCreateDate(LocalDateTime.of(2022, 4, 10, 13, 48, 14, 0))
-                .setLastUpdateDate(LocalDateTime.of(2022, 4, 10, 13, 48, 14, 0))
-                .createGiftCertificate();
+        GiftCertificate certificate = GiftCertificate.builder()
+                .giftCertificateId(4)
+                .name("Evroopt")
+                .description("Buy two bananas")
+                .price(new BigDecimal("20.00"))
+                .duration(10)
+                .createDate(LocalDateTime.of(2022, 4, 10, 13, 48, 14, 0))
+                .lastUpdateDate(LocalDateTime.of(2022, 4, 10, 13, 48, 14, 0))
+                .build();
 
 
-        Payment expected = new Payment.PaymentBuilder()
-                .setPaymentId(4)
-                .setCreatedDate(LocalDateTime.of(2022, 5, 26, 22, 25, 17, 0))
-                .setUser(new User(2, "Sanek", "Lupkin"))
-                .createPayment();
+        Payment expected = Payment.builder()
+                .paymentId(4)
+                .createdDate(LocalDateTime.of(2022, 5, 26, 22, 25, 17, 0))
+                .user(new User(2, "Sanek", "Lupkin"))
+                .build();
 
-        UserOrder order1 = new UserOrder.UserOrderBuilder()
-                .setUserOrderId(6)
-                .setCost(new BigDecimal("20.00"))
-                .setGiftCertificate(certificate)
-                .setPayment(expected)
-                .createUserOrder();
+        UserOrder order1 = UserOrder.builder()
+                .orderId(6)
+                .cost(new BigDecimal("20.00"))
+                .giftCertificate(certificate)
+                .payment(expected)
+                .build();
 
-        UserOrder order2 = new UserOrder.UserOrderBuilder()
-                .setUserOrderId(7)
-                .setCost(new BigDecimal("20.00"))
-                .setGiftCertificate(certificate)
-                .setPayment(expected)
-                .createUserOrder();
+        UserOrder order2 = UserOrder.builder()
+                .orderId(7)
+                .cost(new BigDecimal("20.00"))
+                .giftCertificate(certificate)
+                .payment(expected)
+                .build();
 
         Payment actual = paymentDao.readPayment(4).get();
 
@@ -197,32 +197,32 @@ class PaymentDaoImplTest {
 
     private List<Payment> createPaymentList() {
         User user = new User(1, "Ivan", "Pupkin");
-        return List.of(new Payment.PaymentBuilder()
-                        .setPaymentId(1)
-                        .setCreatedDate(LocalDateTime.of(2022, 5, 26, 22, 25, 17, 0))
-                        .setUser(user)
-                        .createPayment(),
-                new Payment.PaymentBuilder()
-                        .setPaymentId(2)
-                        .setCreatedDate(LocalDateTime.of(2022, 5, 27, 22, 25, 17, 0))
-                        .setUser(user)
-                        .createPayment(),
-                new Payment.PaymentBuilder()
-                        .setPaymentId(3)
-                        .setCreatedDate(LocalDateTime.of(2022, 5, 28, 22, 25, 17, 0))
-                        .setUser(user)
-                        .createPayment()
+        return List.of(Payment.builder()
+                        .paymentId(1)
+                        .createdDate(LocalDateTime.of(2022, 5, 26, 22, 25, 17, 0))
+                        .user(user)
+                        .build(),
+                Payment.builder()
+                        .paymentId(2)
+                        .createdDate(LocalDateTime.of(2022, 5, 27, 22, 25, 17, 0))
+                        .user(user)
+                        .build(),
+                Payment.builder()
+                        .paymentId(3)
+                        .createdDate(LocalDateTime.of(2022, 5, 28, 22, 25, 17, 0))
+                        .user(user)
+                        .build()
                 );
     }
 
     private List<UserOrder> createUserOrderList() {
-        return List.of(new UserOrder.UserOrderBuilder()
-                        .setUserOrderId(3)
-                        .setCost(new BigDecimal("5.00"))
-                        .createUserOrder(),
-                new UserOrder.UserOrderBuilder()
-                        .setUserOrderId(4)
-                        .setCost(new BigDecimal("20.00"))
-                        .createUserOrder());
+        return List.of(UserOrder.builder()
+                        .orderId(3)
+                        .cost(new BigDecimal("5.00"))
+                        .build(),
+                UserOrder.builder()
+                        .orderId(4)
+                        .cost(new BigDecimal("20.00"))
+                        .build());
     }
 }

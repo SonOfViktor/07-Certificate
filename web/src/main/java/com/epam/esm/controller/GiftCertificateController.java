@@ -11,7 +11,7 @@ import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.GiftCertificateTagDtoService;
 import com.epam.esm.service.TagService;
 import com.epam.esm.validategroup.ForCreate;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +27,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/certificates")
 @Validated
+@RequiredArgsConstructor
 public class GiftCertificateController {
     public static final String ALL_GIFT_CERTIFICATES = "all_gift_certificates";
     public static final String CERTIFICATE = "certificate";
@@ -34,21 +35,12 @@ public class GiftCertificateController {
     public static final String CREATE = "create";
     public static final String UPDATE = "update";
     public static final String DELETE = "delete";
+
     private final GiftCertificateTagDtoService certificateTagService;
     private final TagService tagService;
     private final GiftCertificateService certificateService;
     private final GiftCertificateModelAssembler certificateAssembler;
     private final TagModelAssembler tagAssembler;
-
-    @Autowired
-    public GiftCertificateController(GiftCertificateTagDtoService certificateTagService, TagService tagService, TagModelAssembler tagAssembler,
-                                     GiftCertificateService certificateService, GiftCertificateModelAssembler assembler) {
-        this.certificateTagService = certificateTagService;
-        this.tagService = tagService;
-        this.certificateService = certificateService;
-        this.certificateAssembler = assembler;
-        this.tagAssembler = tagAssembler;
-    }
 
     @GetMapping("/{id}")
     public EntityModel<GiftCertificate> showCertificate(@PathVariable @Positive int id) {

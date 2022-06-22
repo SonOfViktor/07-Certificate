@@ -37,7 +37,7 @@ class GiftCertificateTagDtoServiceImplTest {
         giftCertificateList.get(0).setGiftCertificateId(1);
         giftCertificateList.get(1).setGiftCertificateId(2);
 
-        tags = Set.of(new Tag("food"), new Tag("summer"));
+        tags = Set.of(new Tag(0, "food"), new Tag(0, "summer"));
 
         certificateTagsDtoList = giftCertificateList.stream()
                 .map((cert) -> new CertificateTagsDto(cert, tags))

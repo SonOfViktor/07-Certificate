@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Transactional
 class TagDaoImplTest {
     public static final String MODULE_TWO_TAG = "module_4.tags";
-    private TagDao tagDao;
-    private JdbcTemplate jdbcTemplate;
+    private final TagDao tagDao;
+    private final JdbcTemplate jdbcTemplate;
     private final EntityManager entityManager;
 
     @Autowired
@@ -47,14 +47,14 @@ class TagDaoImplTest {
     @Test
     @Disabled("GiftCertificateDaoTest impact on id of tags")
     void testCreateTag() {
-        Tag tag = new Tag("piece");
+        Tag tag = new Tag(0, "piece");
         int actual = tagDao.createTag(tag).getTagId();
         assertEquals(7, actual);
     }
 
     @Test
     void testCreateTagSameName() {
-        Tag tag = new Tag("food");
+        Tag tag = new Tag(0, "food");
         int actual = tagDao.createTag(tag).getTagId();
         assertEquals(1, actual);
     }
@@ -63,7 +63,7 @@ class TagDaoImplTest {
     @Test
     @Disabled("GiftCertificateDaoTest impact on id of tags")
     void addTags() {
-        Set<Tag> tags = Set.of(new Tag("food"), new Tag("business"), new Tag("shopping"));
+        Set<Tag> tags = Set.of(new Tag(0, "food"), new Tag(0, "business"), new Tag(0, "shopping"));
 
         int[] expected = new int[]{1, 8, 9};
         int[] actual = tagDao.addTags(tags).stream().map(Tag::getTagId).mapToInt(id -> id).toArray();
@@ -73,7 +73,7 @@ class TagDaoImplTest {
 
     @Test
     void addAllExistTags() {
-        Set<Tag> tags = Set.of(new Tag("food"), new Tag("shoe"), new Tag("paper"));
+        Set<Tag> tags = Set.of(new Tag(0, "food"), new Tag(0, "shoe"), new Tag(0, "paper"));
 
         int[] expected = new int[]{1, 5, 3};
         int[] actual = tagDao.addTags(tags).stream().map(Tag::getTagId).mapToInt(id -> id).toArray();

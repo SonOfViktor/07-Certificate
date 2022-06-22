@@ -5,7 +5,7 @@ import com.epam.esm.assembler.PaymentModelAssembler;
 import com.epam.esm.dto.PaymentDto;
 import com.epam.esm.entity.Page;
 import com.epam.esm.service.PaymentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,19 +16,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @Validated
 @RestController
 @RequestMapping("/payment")
+@RequiredArgsConstructor
 public class PaymentController {
     public static final String USERS = "users";
     private final PaymentService paymentService;
     private final PaymentModelAssembler paymentAssembler;
     private final OrderModelAssembler orderAssembler;
-
-    @Autowired
-    public PaymentController(PaymentService paymentService, PaymentModelAssembler paymentAssembler,
-                             OrderModelAssembler orderAssembler) {
-        this.paymentService = paymentService;
-        this.orderAssembler = orderAssembler;
-        this.paymentAssembler = paymentAssembler;
-    }
 
     @GetMapping("/{paymentId}")
     public EntityModel<PaymentDto> showPayment(@PathVariable @Positive int paymentId) {

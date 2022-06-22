@@ -17,7 +17,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Component
 @Aspect
 public class PageAspect {
-
     public static final String PREVIOUS = "previous";
     public static final String FIRST = "first";
     public static final String NEXT = "next";

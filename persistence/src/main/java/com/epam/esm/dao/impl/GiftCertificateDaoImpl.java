@@ -5,8 +5,8 @@ import com.epam.esm.dao.criteria.CriteriaParameterMaker;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.GiftCertificate_;
 import com.epam.esm.entity.SelectQueryParameter;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.*;
@@ -17,6 +17,7 @@ import java.util.Optional;
 import static org.apache.commons.lang3.math.NumberUtils.INTEGER_ZERO;
 
 @Repository
+@RequiredArgsConstructor
 public class GiftCertificateDaoImpl implements GiftCertificateDao {
     public static final String SELECT_ALL_GIFT_CERTIFICATES_HQL = """
             select cert from GiftCertificate cert
@@ -26,12 +27,6 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
 
     private final EntityManager entityManager;
     private final CriteriaParameterMaker criteriaParameterMaker;
-
-    @Autowired
-    public GiftCertificateDaoImpl(EntityManager entityManager, CriteriaParameterMaker criteriaParameterMaker) {
-        this.entityManager = entityManager;
-        this.criteriaParameterMaker = criteriaParameterMaker;
-    }
 
     @Override
     public GiftCertificate createGiftCertificate(GiftCertificate certificate) {

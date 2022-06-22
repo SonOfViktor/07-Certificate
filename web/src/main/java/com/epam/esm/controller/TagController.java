@@ -4,7 +4,7 @@ import com.epam.esm.assembler.TagModelAssembler;
 import com.epam.esm.entity.Page;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.TagService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -21,20 +21,16 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/tags")
 @Validated
+@RequiredArgsConstructor
 public class TagController {
     public static final String ALL_TAGS = "all_tags";
     public static final String POPULAR_TAGS = "popular_tags";
     public static final String ALL_GIFT_CERTIFICATES = "all_gift_certificates";
     public static final String CREATE = "create";
     public static final String DELETE = "delete";
+
     private final TagService tagService;
     private final TagModelAssembler tagAssembler;
-
-    @Autowired
-    public TagController(TagService tagService, TagModelAssembler tagAssembler) {
-        this.tagService = tagService;
-        this.tagAssembler = tagAssembler;
-    }
 
     @GetMapping
     public Page<EntityModel<Tag>> showAllTags(@RequestParam(required = false, defaultValue = "1") Integer page,

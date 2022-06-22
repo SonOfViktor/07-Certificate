@@ -3,8 +3,8 @@ package com.epam.esm.controller;
 import com.epam.esm.entity.ErrorCode;
 import com.epam.esm.entity.ErrorInfo;
 import com.epam.esm.exception.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +16,14 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import javax.validation.ConstraintViolationException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@RequiredArgsConstructor
 public class ExceptionAdviceController {
     private static final String RESOURCE_NOT_FOUND = "resource_not_found";
     private static final String ARGUMENT_NOT_VALID = "argument_not_valid";
@@ -32,11 +36,6 @@ public class ExceptionAdviceController {
     private static final String EXCEPTION_MESSAGE_MAP_KEY = "exception_message";
 
     MessageSource messageSource;
-
-    @Autowired
-    public ExceptionAdviceController(MessageSource messageSource) {
-        this.messageSource = messageSource;
-    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorInfo> resourceNotFoundExceptionHandler(ResourceNotFoundException ex, Locale locale) {

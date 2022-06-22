@@ -7,7 +7,7 @@ import com.epam.esm.dto.PaymentDto;
 import com.epam.esm.entity.*;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.PaymentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -18,29 +18,24 @@ import static org.apache.commons.lang3.math.NumberUtils.INTEGER_ZERO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
+@RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
     private static final String DELETED = "DELETED";
+
     private final PaymentDao paymentDao;
     private final UserDao userDao;
     private final GiftCertificateDao giftCertificateDao;
-
-    @Autowired
-    public PaymentServiceImpl(PaymentDao paymentDao, UserDao userDao, GiftCertificateDao giftCertificateDao) {
-        this.paymentDao = paymentDao;
-        this.userDao = userDao;
-        this.giftCertificateDao = giftCertificateDao;
-    }
 
     @Override
     public PaymentDto addPayment(int userId, List<Integer> giftCertificateIdList) {
         User user = userDao.readUserById(userId).orElseThrow(() ->
                 new ResourceNotFoundException("There is no user with Id " + userId + " in database"));
 
-        Payment payment = new Payment.PaymentBuilder()
-                .setCreatedDate(LocalDateTime.now())
-                .setUser(user)
-                .setUserOrder(createUserOrders(giftCertificateIdList))
-                .createPayment();
+        Payment payment = Payment.builder()
+                .createdDate(LocalDateTime.now())
+                .user(user)
+                .build();
+        payment.setOrders(createUserOrders(giftCertificateIdList));
 
         Payment createdPayment = paymentDao.createPayment(payment);
 
@@ -104,10 +99,10 @@ public class PaymentServiceImpl implements PaymentService {
         return giftCertificateIdList.stream()
                 .map(id -> giftCertificateDao.readGiftCertificate(id).orElseThrow(() ->
                         new ResourceNotFoundException("There is no certificate with Id " + id + " in database")))
-                .map(gc -> new UserOrder.UserOrderBuilder()
-                        .setCost(gc.getPrice())
-                        .setGiftCertificate(gc)
-                        .createUserOrder())
+                .map(gc -> UserOrder.builder()
+                        .cost(gc.getPrice())
+                        .giftCertificate(gc)
+                        .build())
                 .toList();
     }
 

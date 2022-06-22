@@ -7,13 +7,12 @@ import com.epam.esm.entity.Page;
 import com.epam.esm.entity.User;
 import com.epam.esm.service.PaymentService;
 import com.epam.esm.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
-
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -22,22 +21,15 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Validated
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
     public static final String USERS = "users";
     public static final String CREATE = "create";
+
     private final UserService userService;
     private final PaymentService paymentService;
     private final UserModelAssembler userAssembler;
     private final PaymentModelAssembler paymentAssembler;
-
-    @Autowired
-    public UserController(UserService userService, PaymentService paymentService,
-                          UserModelAssembler userAssembler, PaymentModelAssembler paymentAssembler) {
-        this.userService = userService;
-        this.paymentService = paymentService;
-        this.userAssembler = userAssembler;
-        this.paymentAssembler = paymentAssembler;
-    }
 
     @GetMapping
     public Page<EntityModel<User>> showAllUsers(

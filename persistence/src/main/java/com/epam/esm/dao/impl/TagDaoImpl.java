@@ -3,7 +3,7 @@ package com.epam.esm.dao.impl;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.criteria.SubqueryMostUsedHighestPriceTagMaker;
 import com.epam.esm.entity.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.math.NumberUtils.INTEGER_ZERO;
 
 @Repository
+@RequiredArgsConstructor
 public class TagDaoImpl implements TagDao {
 
     public static final String SELECT_ALL_TAGS_HQL = "select tag from Tag tag order by tag.tagId";
@@ -30,12 +31,6 @@ public class TagDaoImpl implements TagDao {
 
     private final EntityManager entityManager;
     private final SubqueryMostUsedHighestPriceTagMaker subqueryTagMaker;
-
-    @Autowired
-    public TagDaoImpl(EntityManager entityManager, SubqueryMostUsedHighestPriceTagMaker subqueryTagMaker) {
-        this.entityManager = entityManager;
-        this.subqueryTagMaker = subqueryTagMaker;
-    }
 
     @Override
     public Tag createTag(Tag tag) {

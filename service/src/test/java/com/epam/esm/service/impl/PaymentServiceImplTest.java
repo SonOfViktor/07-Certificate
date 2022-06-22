@@ -38,24 +38,24 @@ class PaymentServiceImplTest {
     void testCreatePayment() {
         User user = new User(1, "Maks", "Silev");
 
-        GiftCertificate giftCertificate = new GiftCertificate.GiftCertificateBuilder()
-                .setGiftCertificateId(1)
-                .setPrice(new BigDecimal("40.00"))
-                .setName("Oz.by")
-                .createGiftCertificate();
+        GiftCertificate giftCertificate = GiftCertificate.builder()
+                .giftCertificateId(1)
+                .price(new BigDecimal("40.00"))
+                .name("Oz.by")
+                .build();
 
-        UserOrder order = new UserOrder.UserOrderBuilder()
-                .setUserOrderId(1)
-                .setCost(new BigDecimal("40.00"))
-                .setGiftCertificate(giftCertificate)
-                .createUserOrder();
+        UserOrder order = UserOrder.builder()
+                .orderId(1)
+                .cost(new BigDecimal("40.00"))
+                .giftCertificate(giftCertificate)
+                .build();
 
-        Payment payment = new Payment.PaymentBuilder()
-                .setPaymentId(1)
-                .setUserOrder(List.of(order))
-                .setCreatedDate(LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0))
-                .setUser(user)
-                .createPayment();
+        Payment payment = Payment.builder()
+                .paymentId(1)
+                .orders(List.of(order))
+                .createdDate(LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0))
+                .user(user)
+                .build();
 
         when(userDao.readUserById(1)).thenReturn(Optional.of(user));
         when(giftCertificateDao.readGiftCertificate(1)).thenReturn(Optional.of(giftCertificate));
@@ -138,15 +138,15 @@ class PaymentServiceImplTest {
 
     @Test
     void testFindUserOrderByPaymentId() {
-        GiftCertificate giftCertificate = new GiftCertificate.GiftCertificateBuilder()
-                .setGiftCertificateId(1)
-                .setName("Oz.by")
-                .createGiftCertificate();
-        UserOrder order = new UserOrder.UserOrderBuilder()
-                .setUserOrderId(1)
-                .setCost(new BigDecimal("40.00"))
-                .setGiftCertificate(giftCertificate)
-                .createUserOrder();
+        GiftCertificate giftCertificate = GiftCertificate.builder()
+                .giftCertificateId(1)
+                .name("Oz.by")
+                .build();
+        UserOrder order = UserOrder.builder()
+                .orderId(1)
+                .cost(new BigDecimal("40.00"))
+                .giftCertificate(giftCertificate)
+                .build();
 
         PaymentDto.UserOrderDto orderDto = new PaymentDto.UserOrderDto(1, "Oz.by", new BigDecimal("40.00"));
 
@@ -161,11 +161,11 @@ class PaymentServiceImplTest {
 
     @Test
     void testFindUserOrderByPaymentIdWithDeletedCertificate() {
-        UserOrder order = new UserOrder.UserOrderBuilder()
-                .setUserOrderId(1)
-                .setCost(new BigDecimal("40.00"))
-                .setGiftCertificate(null)
-                .createUserOrder();
+        UserOrder order = UserOrder.builder()
+                .orderId(1)
+                .cost(new BigDecimal("40.00"))
+                .giftCertificate(null)
+                .build();
 
         PaymentDto.UserOrderDto orderDto = new PaymentDto.UserOrderDto(0, "DELETED", new BigDecimal("40.00"));
 
@@ -187,20 +187,22 @@ class PaymentServiceImplTest {
 
     private Payment createPayment() {
         User user = new User(1, "Maks", "Silev");
-        GiftCertificate giftCertificate = new GiftCertificate.GiftCertificateBuilder()
-                .setGiftCertificateId(1)
-                .setName("Oz.by")
-                .createGiftCertificate();
-        UserOrder order = new UserOrder.UserOrderBuilder()
-                .setUserOrderId(1)
-                .setCost(new BigDecimal("40.00"))
-                .setGiftCertificate(giftCertificate)
-                .createUserOrder();
-        return new Payment.PaymentBuilder()
-                .setPaymentId(1)
-                .setUser(user)
-                .setUserOrder(List.of(order))
-                .setCreatedDate(LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0))
-                .createPayment();
+        GiftCertificate giftCertificate = GiftCertificate.builder()
+                .giftCertificateId(1)
+                .name("Oz.by")
+                .build();
+        UserOrder order = UserOrder.builder()
+                .orderId(1)
+                .cost(new BigDecimal("40.00"))
+                .giftCertificate(giftCertificate)
+                .build();
+        Payment payment = Payment.builder()
+                .paymentId(1)
+                .user(user)
+                .createdDate(LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0))
+                .build();
+        payment.setOrders(List.of(order));
+
+        return payment;
     }
 }

@@ -61,12 +61,12 @@ class GiftCertificateDaoImplTest {
     @Order(0)
     @Test
     void testCreateGiftCertificate() {
-        GiftCertificate certificate = new GiftCertificate.GiftCertificateBuilder()
-                .setName("Ganna")
-                .setDescription("Хозяйки нам доверяют")
-                .setPrice(new BigDecimal(60))
-                .setDuration(30)
-                .createGiftCertificate();
+        GiftCertificate certificate = GiftCertificate.builder()
+                .name("Ganna")
+                .description("Хозяйки нам доверяют")
+                .price(new BigDecimal(60))
+                .duration(30)
+                .build();
 
         int actualId = giftCertificateDao.createGiftCertificate(certificate).getGiftCertificateId();
         int expectedId = 5;
@@ -77,15 +77,15 @@ class GiftCertificateDaoImplTest {
     @Order(1)
     @Test
     void testCreateGiftCertificateWithTags() {
-        Set<Tag> tags = Set.of(new Tag("name"), new Tag("food"));
+        Set<Tag> tags = Set.of(new Tag(0, "name"), new Tag(0, "food"));
         tagDao.addTags(tags);
-        GiftCertificate certificate = new GiftCertificate.GiftCertificateBuilder()
-                .setName("Ganna")
-                .setDescription("Хозяйки нам доверяют")
-                .setPrice(new BigDecimal(60))
-                .setDuration(30)
-                .setTags(tags)
-                .createGiftCertificate();
+        GiftCertificate certificate = GiftCertificate.builder()
+                .name("Ganna")
+                .description("Хозяйки нам доверяют")
+                .price(new BigDecimal(60))
+                .duration(30)
+                .tags(tags)
+                .build();
 
         int actualId = giftCertificateDao.createGiftCertificate(certificate).getGiftCertificateId();
         int expectedId = 6;
@@ -163,12 +163,12 @@ class GiftCertificateDaoImplTest {
 
     @Test
     void testUpdateGiftCertificateWithTags() {
-        Tag newTag = new Tag("name");
+        Tag newTag = new Tag(0, "name");
         tagDao.createTag(newTag);
-        GiftCertificate certificate = new GiftCertificate.GiftCertificateBuilder()
-                .setGiftCertificateId(1)
-                .setTags(new HashSet<>(tagDao.readTagByCertificateId(1)))
-                .createGiftCertificate();
+        GiftCertificate certificate = GiftCertificate.builder()
+                .giftCertificateId(1)
+                .tags(new HashSet<>(tagDao.readTagByCertificateId(1)))
+                .build();
         certificate.getTags().add(newTag);
 
         giftCertificateDao.updateGiftCertificate(certificate).get();
@@ -183,11 +183,11 @@ class GiftCertificateDaoImplTest {
 
     @Test
     void testUpdateNonExistentGiftCertificate() {
-        GiftCertificate replaceCertificate = new GiftCertificate.GiftCertificateBuilder()
-                .setGiftCertificateId(6)
-                .setName("Milavitsa")
-                .setDuration(40)
-                .createGiftCertificate();
+        GiftCertificate replaceCertificate = GiftCertificate.builder()
+                .giftCertificateId(6)
+                .name("Milavitsa")
+                .duration(40)
+                .build();
         assertTrue(giftCertificateDao.updateGiftCertificate(replaceCertificate).isEmpty());
     }
 
@@ -226,30 +226,30 @@ class GiftCertificateDaoImplTest {
 
     private List<GiftCertificate> createAllCertificateList() {
         return List.of(
-                new GiftCertificate.GiftCertificateBuilder().setGiftCertificateId(1).setName("Oz.by")
-                        .setDescription("Books, games, stationery").setPrice(new BigDecimal("20.00"))
-                        .setDuration(40)
-                        .setCreateDate(LocalDateTime.of(2022, 4, 11, 13, 48, 14, 0))
-                        .setLastUpdateDate(LocalDateTime.of(2022, 4, 11, 13, 48, 14, 0))
-                        .createGiftCertificate(),
-                new GiftCertificate.GiftCertificateBuilder().setGiftCertificateId(2).setName("Belvest")
-                        .setDescription("Change two shoes").setPrice(new BigDecimal("50.00"))
-                        .setDuration(30)
-                        .setCreateDate(LocalDateTime.of(2022, 4, 12, 13, 48, 14, 0))
-                        .setLastUpdateDate(LocalDateTime.of(2022, 4, 12, 13, 48, 14, 0))
-                        .createGiftCertificate(),
-                new GiftCertificate.GiftCertificateBuilder().setGiftCertificateId(3).setName("Evroopt")
-                        .setDescription("We have a lot of sugar!").setPrice(new BigDecimal("40.00"))
-                        .setDuration(10)
-                        .setCreateDate(LocalDateTime.of(2022, 4, 13, 13, 48, 14, 0))
-                        .setLastUpdateDate(LocalDateTime.of(2022, 4, 13, 13, 48, 14, 0))
-                        .createGiftCertificate(),
-                new GiftCertificate.GiftCertificateBuilder().setGiftCertificateId(4).setName("Evroopt")
-                        .setDescription("Buy two bananas").setPrice(new BigDecimal("20.00"))
-                        .setDuration(10)
-                        .setCreateDate(LocalDateTime.of(2022, 4, 10, 13, 48, 14, 0))
-                        .setLastUpdateDate(LocalDateTime.of(2022, 4, 10, 13, 48, 14, 0))
-                        .createGiftCertificate());
+                GiftCertificate.builder().giftCertificateId(1).name("Oz.by")
+                        .description("Books, games, stationery").price(new BigDecimal("20.00"))
+                        .duration(40)
+                        .createDate(LocalDateTime.of(2022, 4, 11, 13, 48, 14, 0))
+                        .lastUpdateDate(LocalDateTime.of(2022, 4, 11, 13, 48, 14, 0))
+                        .build(),
+                GiftCertificate.builder().giftCertificateId(2).name("Belvest")
+                        .description("Change two shoes").price(new BigDecimal("50.00"))
+                        .duration(30)
+                        .createDate(LocalDateTime.of(2022, 4, 12, 13, 48, 14, 0))
+                        .lastUpdateDate(LocalDateTime.of(2022, 4, 12, 13, 48, 14, 0))
+                        .build(),
+                GiftCertificate.builder().giftCertificateId(3).name("Evroopt")
+                        .description("We have a lot of sugar!").price(new BigDecimal("40.00"))
+                        .duration(10)
+                        .createDate(LocalDateTime.of(2022, 4, 13, 13, 48, 14, 0))
+                        .lastUpdateDate(LocalDateTime.of(2022, 4, 13, 13, 48, 14, 0))
+                        .build(),
+                GiftCertificate.builder().giftCertificateId(4).name("Evroopt")
+                        .description("Buy two bananas").price(new BigDecimal("20.00"))
+                        .duration(10)
+                        .createDate(LocalDateTime.of(2022, 4, 10, 13, 48, 14, 0))
+                        .lastUpdateDate(LocalDateTime.of(2022, 4, 10, 13, 48, 14, 0))
+                        .build());
     }
 
     Stream<Arguments> stringQueryAndResult() {
@@ -291,44 +291,44 @@ class GiftCertificateDaoImplTest {
         GiftCertificate notUpdatedCertificate = createAllCertificateList().get(0);
 
         return Stream.of(
-                arguments(new GiftCertificate.GiftCertificateBuilder()
-                                .setGiftCertificateId(1)
-                                .setName("   ")
-                                .setDescription("   ")
-                                .setPrice(null)
-                                .setDuration(-8)
-                                .createGiftCertificate(), notUpdatedCertificate),
-                arguments(new GiftCertificate.GiftCertificateBuilder()
-                                .setGiftCertificateId(1)
-                                .createGiftCertificate(), notUpdatedCertificate),
-                arguments(new GiftCertificate.GiftCertificateBuilder()
-                                .setGiftCertificateId(1)
-                                .setName("  Milavitsa ")
-                                .setDescription(" Our care for you")
-                                .setPrice(new BigDecimal("15.15"))
-                                .setDuration(10)
-                                .createGiftCertificate(),
-                        new GiftCertificate.GiftCertificateBuilder()
-                                .setGiftCertificateId(1)
-                                .setName("Milavitsa")
-                                .setDescription("Our care for you")
-                                .setPrice(new BigDecimal("15.15"))
-                                .setDuration(10)
-                                .setCreateDate(notUpdatedCertificate.getCreateDate())
-                                .createGiftCertificate()),
-                arguments(new GiftCertificate.GiftCertificateBuilder()
-                                .setGiftCertificateId(1)
-                                .setPrice(new BigDecimal(20))
-                                .setDuration(99)
-                                .createGiftCertificate(),
-                        new GiftCertificate.GiftCertificateBuilder()
-                                .setGiftCertificateId(1)
-                                .setName("Oz.by")
-                                .setDescription("Books, games, stationery")
-                                .setPrice(new BigDecimal("20"))
-                                .setDuration(99)
-                                .setCreateDate(LocalDateTime.of(2022, 4, 11, 13, 48, 14, 0))
-                                .createGiftCertificate())
+                arguments(GiftCertificate.builder()
+                                .giftCertificateId(1)
+                                .name("   ")
+                                .description("   ")
+                                .price(null)
+                                .duration(-8)
+                                .build(), notUpdatedCertificate),
+                arguments(GiftCertificate.builder()
+                                .giftCertificateId(1)
+                                .build(), notUpdatedCertificate),
+                arguments(GiftCertificate.builder()
+                                .giftCertificateId(1)
+                                .name("  Milavitsa ")
+                                .description(" Our care for you")
+                                .price(new BigDecimal("15.15"))
+                                .duration(10)
+                                .build(),
+                        GiftCertificate.builder()
+                                .giftCertificateId(1)
+                                .name("Milavitsa")
+                                .description("Our care for you")
+                                .price(new BigDecimal("15.15"))
+                                .duration(10)
+                                .createDate(notUpdatedCertificate.getCreateDate())
+                                .build()),
+                arguments(GiftCertificate.builder()
+                                .giftCertificateId(1)
+                                .price(new BigDecimal(20))
+                                .duration(99)
+                                .build(),
+                        GiftCertificate.builder()
+                                .giftCertificateId(1)
+                                .name("Oz.by")
+                                .description("Books, games, stationery")
+                                .price(new BigDecimal("20"))
+                                .duration(99)
+                                .createDate(LocalDateTime.of(2022, 4, 11, 13, 48, 14, 0))
+                                .build())
         );
     }
 }

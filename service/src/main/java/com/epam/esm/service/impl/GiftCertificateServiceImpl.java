@@ -7,22 +7,17 @@ import com.epam.esm.entity.PageMeta;
 import com.epam.esm.entity.SelectQueryParameter;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.GiftCertificateService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
+@RequiredArgsConstructor
 public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateDao giftCertificateDao;
-
-    @Autowired
-    public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao) {
-        this.giftCertificateDao = giftCertificateDao;
-    }
 
     @Override
     public GiftCertificate addGiftCertificate(GiftCertificate certificate) {
