@@ -1,6 +1,8 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.entity.Page;
+import com.epam.esm.entity.PageMeta;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.TagService;
@@ -30,13 +32,28 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<Tag> findAllTags() {
-        return tagDao.readAllTag();
+    public Page<Tag> findAllTags(int page, int size) {
+        PageMeta pageMeta = createPageMeta(page, size, Collections.emptyMap());
+
+        int offset = page * size - size;
+        List<Tag> tags = tagDao.readAllTag(offset, size);
+
+        return new Page<>(tags, pageMeta);
     }
 
     @Override
     public Set<Tag> findTagsByCertificateId(int certificateId) {
-        return tagDao.readAllTagByCertificateId(certificateId);
+        return tagDao.readTagByCertificateId(certificateId);
+    }
+
+    @Override
+    public Page<Tag> findTagsByCertificateId(int certificateId, int page, int size) {
+        PageMeta pageMeta = createPageMeta(page, size, Map.of("id", certificateId));
+
+        int offset = page * size - size;
+
+        Set<Tag> tags = tagDao.readTagByCertificateId(certificateId, offset, size);
+        return new Page<>(tags, pageMeta);
     }
 
     @Override
@@ -62,5 +79,16 @@ public class TagServiceImpl implements TagService {
         }
 
         return affectedRow;
+    }
+
+    private PageMeta createPageMeta(int page, int limit, Map<String, Integer> params) {
+        int tagTotalElements = tagDao.countTags(params);
+        int totalPages = (int) Math.ceil((double) tagTotalElements / limit);
+
+        if(page > totalPages) {
+            throw new ResourceNotFoundException("There is no tags in the database for " + page + " page");
+        }
+
+        return new PageMeta(limit, tagTotalElements, totalPages, page);
     }
 }

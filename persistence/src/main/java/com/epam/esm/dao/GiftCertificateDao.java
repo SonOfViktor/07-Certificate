@@ -20,17 +20,21 @@ public interface GiftCertificateDao {
     /**
      * Read all certificate from database.
      *
+     * @param offset initial offset in table with certificates
+     * @param size amount certificates to extract from table with certificates
      * @return the list of all gift certificates in the database
      */
-    List<GiftCertificate> readAllCertificate();
+    List<GiftCertificate> readAllCertificate(int offset, int size);
 
     /**
      * Read gift certificates based on given sql script.
      *
-     * @param parameter  the object with parameters to filter gift certificates
+     * @param params  the object with parameters to filter gift certificates
+     * @param offset initial offset in table with certificates
+     * @param size amount certificates to extract from table with certificates
      * @return the list of specific gift certificates by sql script
      */
-    List<GiftCertificate> readGiftCertificateWithParam(SelectQueryParameter parameter);
+    List<GiftCertificate> readGiftCertificateWithParam(SelectQueryParameter params, int offset, int size);
 
     /**
      * Read certain gift certificate.
@@ -39,6 +43,14 @@ public interface GiftCertificateDao {
      * @return the optional with gift certificate if it exists in database or optional empty otherwise
      */
     Optional<GiftCertificate> readGiftCertificate(int id);
+
+    /**
+     * Find out amount of entries in table with gift certificates
+     *
+     * @param params the object with parameters to filter gift certificates
+     * @return amount of entries in table with gift certificates
+     */
+    int countGiftCertificate(SelectQueryParameter params);
 
     /**
      * Update gift certificate with specified id.

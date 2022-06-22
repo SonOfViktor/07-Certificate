@@ -14,7 +14,11 @@ import java.util.Optional;
 
 @Repository
 public class GiftCertificateDaoImpl implements GiftCertificateDao {
-    public static final String SELECT_ALL_GIFT_CERTIFICATES_HQL = "select cert from GiftCertificate cert";
+    public static final String SELECT_ALL_GIFT_CERTIFICATES_HQL = """
+            select cert from GiftCertificate cert
+            order by cert.giftCertificateId
+            """;
+    public static final String SELECT_COUNT_ALL_GIFT_CERTIFICATES_HQL = "select count(cert) from GiftCertificate cert";
     public static final String DELETE_GIFT_CERTIFICATE_BY_ID_HQL =
             "delete from GiftCertificate cert where cert.giftCertificateId = :id";
     public static final String ID_PARAMETER = "id";
@@ -40,32 +44,43 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public List<GiftCertificate> readAllCertificate() {
-        return entityManager.createQuery(SELECT_ALL_GIFT_CERTIFICATES_HQL, GiftCertificate.class).getResultList();
+    public List<GiftCertificate> readAllCertificate(int offset, int size) {
+        return entityManager.createQuery(SELECT_ALL_GIFT_CERTIFICATES_HQL, GiftCertificate.class)
+                .setFirstResult(offset)
+                .setMaxResults(size)
+                .getResultList();
     }
 
     @Override
-    public List<GiftCertificate> readGiftCertificateWithParam(SelectQueryParameter parameter) {
+    public List<GiftCertificate> readGiftCertificateWithParam(SelectQueryParameter params, int offset, int size) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<GiftCertificate> criteria = criteriaBuilder.createQuery(GiftCertificate.class);
 
         Root<GiftCertificate> giftCertificate = criteria.from(GiftCertificate.class);
 
         List<Predicate> predicates = criteriaParameterMaker
-                .createPredicate(criteriaBuilder, criteria, giftCertificate, parameter);
-        List<Order> orders = criteriaParameterMaker.createOrder(criteriaBuilder, giftCertificate, parameter);
+                .createPredicate(criteriaBuilder, criteria, giftCertificate, params);
+        List<Order> orders = criteriaParameterMaker.createOrder(criteriaBuilder, giftCertificate, params);
 
         criteria.select(giftCertificate)
                 .where(predicates.toArray(Predicate[]::new))
                 .orderBy(orders)
                 .groupBy(giftCertificate.get(GiftCertificate_.giftCertificateId));
 
-        return entityManager.createQuery(criteria).getResultList();
+        return entityManager.createQuery(criteria)
+                .setFirstResult(offset)
+                .setMaxResults(size)
+                .getResultList();
     }
 
     @Override
     public Optional<GiftCertificate> readGiftCertificate(int id) {
         return Optional.ofNullable(entityManager.find(GiftCertificate.class, id));
+    }
+
+    @Override
+    public int countGiftCertificate(SelectQueryParameter params) {
+        return params == null ? countAllGiftCertificate() : countGiftCertificateWithParams(params);
     }
 
     @Override
@@ -86,23 +101,44 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     private GiftCertificate fillCertificateNewValues(GiftCertificate updatedCertificate, GiftCertificate updatingCertificate) {
-        if(StringUtils.isNotBlank(updatingCertificate.getName())) {
+        if (StringUtils.isNotBlank(updatingCertificate.getName())) {
             updatedCertificate.setName(updatingCertificate.getName().trim());
         }
-        if(StringUtils.isNotBlank(updatingCertificate.getDescription())) {
+        if (StringUtils.isNotBlank(updatingCertificate.getDescription())) {
             updatedCertificate.setDescription(updatingCertificate.getDescription().trim());
         }
-        if(updatingCertificate.getPrice() != null) {
+        if (updatingCertificate.getPrice() != null) {
             updatedCertificate.setPrice(updatingCertificate.getPrice());
         }
-        if(updatingCertificate.getDuration() > 0) {
+        if (updatingCertificate.getDuration() > 0) {
             updatedCertificate.setDuration(updatingCertificate.getDuration());
         }
-        if(!updatingCertificate.getTags().isEmpty()) {
+        if (!updatingCertificate.getTags().isEmpty()) {
             updatedCertificate.setTags(updatingCertificate.getTags());
         }
         updatedCertificate.setLastUpdateDate(LocalDateTime.now());
 
         return updatedCertificate;
+    }
+
+    private int countAllGiftCertificate() {
+        return entityManager.createQuery(SELECT_COUNT_ALL_GIFT_CERTIFICATES_HQL, Long.class)
+                .getSingleResult()
+                .intValue();
+    }
+
+    private int countGiftCertificateWithParams(SelectQueryParameter params) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
+
+        Root<GiftCertificate> giftCertificate = criteria.from(GiftCertificate.class);
+
+        List<Predicate> predicates = criteriaParameterMaker
+                .createPredicate(criteriaBuilder, criteria, giftCertificate, params);
+
+        criteria.select(criteriaBuilder.count(giftCertificate))
+                .where(predicates.toArray(Predicate[]::new));
+
+        return entityManager.createQuery(criteria).getSingleResult().intValue();
     }
 }

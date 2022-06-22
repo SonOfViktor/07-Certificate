@@ -1,6 +1,7 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.PaymentDto;
+import com.epam.esm.entity.Page;
 import java.util.List;
 
 public interface PaymentService {
@@ -22,11 +23,23 @@ public interface PaymentService {
     PaymentDto findPayment(int paymentId);
 
     /**
-     * Find payment made by user with specified id
+     * Find page with payments made by user with specified id
      *
      * @param userId id of the user that made payment
-     * @return list payment dtos with info about payments made by specified user
+     * @param page number of page with payments
+     * @param size amount objects in one page
+     * @return page of payment dtos with info about payments made by specified user
      */
-    List<PaymentDto> findPaymentsByUserId(int userId);
+    Page<PaymentDto> findPaymentsByUserId(int userId, int page, int size);
+
+    /**
+     * Find page with orders in payment with specified id
+     *
+     * @param paymentId payment id
+     * @param page number of page with orders
+     * @param size amount objects in one page
+     * @return page with order dtos with info about order in payment with specified id
+     */
+    Page<PaymentDto.UserOrderDto> findUserOrderByPaymentId(int paymentId, int page, int size);
 
 }

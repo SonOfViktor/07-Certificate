@@ -9,18 +9,17 @@ import com.epam.esm.entity.UserOrder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -119,7 +118,7 @@ class PaymentDaoImplTest {
                 .setPayment(expected)
                 .createUserOrder();
 
-        Payment actual = paymentDao.readPayment(4);
+        Payment actual = paymentDao.readPayment(4).get();
 
         assertEquals(expected, actual);
         assertEquals(List.of(order1, order2), actual.getOrders());
@@ -127,20 +126,32 @@ class PaymentDaoImplTest {
 
     @Test
     void testNonExistOrder() {
-        assertThrows(EmptyResultDataAccessException.class,() -> paymentDao.readPayment(50));
+        assertTrue(paymentDao.readPayment(50).isEmpty());
+    }
+
+    @Test
+    void testReadUserOrderByPaymentId() {
+        List<UserOrder> expected = createUserOrderList();
+        List<UserOrder> actual = paymentDao.readUserOrderByPaymentId(2, 0, 4);
+
+        assertThat(actual).usingRecursiveFieldByFieldElementComparatorIgnoringFields("payment", "giftCertificate")
+                .isEqualTo(expected);
+        assertThat(actual.get(0).getGiftCertificate().getName()).isEqualTo("Belvest");
+        assertThat(actual.get(1).getPayment().getCreatedDate())
+                .isEqualTo(LocalDateTime.of(2022, 5, 27, 22, 25, 17,0));
     }
 
     @Test
     void testReadUserOrders() {
-        List<Payment> expected = createUserOrderList();
-        List<Payment> actual = paymentDao.readPaymentByUserId(1);
+        List<Payment> expected = createPaymentList();
+        List<Payment> actual = paymentDao.readPaymentByUserId(1, 0, 3);
 
         assertEquals(expected, actual);
     }
 
     @Test
     void testNoUserOrders() {
-        List<Payment> actual = paymentDao.readPaymentByUserId(5);
+        List<Payment> actual = paymentDao.readPaymentByUserId(5, 0 , 3);
 
         assertEquals(Collections.emptyList(), actual);
     }
@@ -150,13 +161,41 @@ class PaymentDaoImplTest {
         giftCertificateDao.deleteGiftCertificate(4);
         entityManager.flush();
 
-        Payment payment = paymentDao.readPayment(3);
+        Payment payment = paymentDao.readPayment(3).get();
         GiftCertificate actual = payment.getOrders().get(0).getGiftCertificate();
 
         assertNull(actual);
     }
 
-    private List<Payment> createUserOrderList() {
+    @Test
+    void testCountUserPayments() {
+        int actual = paymentDao.countUserPayments(1);
+
+        assertEquals(3, actual);
+    }
+
+    @Test
+    void testCountNonexistentUserPayments() {
+        int actual = paymentDao.countUserPayments(3);
+
+        assertEquals(0, actual);
+    }
+
+    @Test
+    void testCountPaymentOrders() {
+        int actual = paymentDao.countPaymentOrders(4);
+
+        assertEquals(2, actual);
+    }
+
+    @Test
+    void testCountNonexistentPaymentOrders() {
+        int actual = paymentDao.countPaymentOrders(44);
+
+        assertEquals(0, actual);
+    }
+
+    private List<Payment> createPaymentList() {
         User user = new User(1, "Ivan", "Pupkin");
         return List.of(new Payment.PaymentBuilder()
                         .setPaymentId(1)
@@ -174,5 +213,16 @@ class PaymentDaoImplTest {
                         .setUser(user)
                         .createPayment()
                 );
+    }
+
+    private List<UserOrder> createUserOrderList() {
+        return List.of(new UserOrder.UserOrderBuilder()
+                        .setUserOrderId(3)
+                        .setCost(new BigDecimal("5.00"))
+                        .createUserOrder(),
+                new UserOrder.UserOrderBuilder()
+                        .setUserOrderId(4)
+                        .setCost(new BigDecimal("20.00"))
+                        .createUserOrder());
     }
 }

@@ -1,10 +1,9 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.CertificateTagsDto;
+import com.epam.esm.entity.Page;
 import com.epam.esm.entity.SelectQueryParameter;
 import com.epam.esm.exception.ResourceNotFoundException;
-
-import java.util.List;
 
 /**
  * The interface provide methods to control business logic related with gift certificates together with tags.
@@ -19,20 +18,23 @@ public interface GiftCertificateTagDtoService {
     CertificateTagsDto addGiftCertificateTagDto(CertificateTagsDto certificateTagsDto);
 
     /**
-     * Find all gift certificate with tags.
+     * Find gift certificate with tags for specified page.
      *
-     * @return the list certificates with tags
+     * @param page number of page with gift certificates and tags
+     * @param size amount objects in one page
+     * @return the page with certificates tags
      */
-    List<CertificateTagsDto> findAllGiftCertificateTagDto();
+    Page<CertificateTagsDto> findAllGiftCertificateTagDto(int page, int size);
 
     /**
-     * Find gift certificates with tags according to specified parameters.
+     * Find gift certificates with tags according to specified parameters for specified page.
      *
      * @param params the parameters determinant search for gift certificates
-     * @return the list certificates with tags
-     * @throws ResourceNotFoundException if gift certificates wasn't found
+     * @param page number of page with gift certificates and tags
+     * @param size amount objects in one page
+     * @return the page with certificates and tags
      */
-    List<CertificateTagsDto> findGiftCertificateTagDtoByParam(SelectQueryParameter params);
+    Page<CertificateTagsDto> findGiftCertificateTagDtoByParam(SelectQueryParameter params, int page, int size);
 
     /**
      * Find gift certificate and tags with specified gift certificate id.

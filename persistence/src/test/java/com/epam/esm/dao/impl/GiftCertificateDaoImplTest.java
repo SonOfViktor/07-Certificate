@@ -102,14 +102,23 @@ class GiftCertificateDaoImplTest {
     @Test
     void testReadAllCertificate() {
         List<GiftCertificate> expected = createAllCertificateList();
-        List<GiftCertificate> actual = giftCertificateDao.readAllCertificate();
+        List<GiftCertificate> actual = giftCertificateDao.readAllCertificate(0, 5);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testReadCertificateWithPagination() {
+        List<GiftCertificate> expected = createAllCertificateList().stream()
+                .filter(c -> c.getGiftCertificateId() > 2)
+                .toList();
+        List<GiftCertificate> actual = giftCertificateDao.readAllCertificate(2, 5);
         assertEquals(expected, actual);
     }
 
     @ParameterizedTest()
     @MethodSource("stringQueryAndResult")
     void testReadGiftCertificateWithParam(SelectQueryParameter parameter, List<GiftCertificate> expected) {
-        List<GiftCertificate> actual = giftCertificateDao.readGiftCertificateWithParam(parameter);
+        List<GiftCertificate> actual = giftCertificateDao.readGiftCertificateWithParam(parameter, 0, 5);
         assertEquals(expected, actual);
     }
 
@@ -127,6 +136,22 @@ class GiftCertificateDaoImplTest {
         assertThrows(NoSuchElementException.class, actual::get);
     }
 
+    @Test
+    void testCountGiftCertificateWithoutParameters() {
+        int actual = giftCertificateDao.countGiftCertificate(null);
+
+        assertEquals(4, actual);
+    }
+
+    @Test
+    void testCountGiftCertificateWithParameters() {
+        SelectQueryParameter parameter =
+                new SelectQueryParameter(List.of("paper"), "e", null, null, null);
+        int actual = giftCertificateDao.countGiftCertificate(parameter);
+
+        assertEquals(3, actual);
+    }
+
     @ParameterizedTest()
     @MethodSource("updatingDataAndResult")
     void testUpdateGiftCertificate(GiftCertificate updatingCertificate, GiftCertificate expected) {
@@ -142,7 +167,7 @@ class GiftCertificateDaoImplTest {
         tagDao.createTag(newTag);
         GiftCertificate certificate = new GiftCertificate.GiftCertificateBuilder()
                 .setGiftCertificateId(1)
-                .setTags(new HashSet<>(tagDao.readAllTagByCertificateId(1)))
+                .setTags(new HashSet<>(tagDao.readTagByCertificateId(1)))
                 .createGiftCertificate();
         certificate.getTags().add(newTag);
 

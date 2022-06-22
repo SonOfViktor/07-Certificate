@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,6 +37,23 @@ class UserDaoImplTest {
     }
 
     @Test
+    void testReadAllUser() {
+        List<User> expected = List.of(new User(1, "Ivan", "Pupkin"),
+                new User(2, "Sanek", "Lupkin"));
+        List<User> actual = userDao.readAllUser(0, 10);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testReadAllUserWithPagination() {
+        List<User> expected = List.of(new User(2, "Sanek", "Lupkin"));
+        List<User> actual = userDao.readAllUser(1, 10);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
     void testReadUserById() {
         User expected = new User(1, "Ivan", "Pupkin");
         User actual = userDao.readUserById(1).get();
@@ -48,5 +66,12 @@ class UserDaoImplTest {
         Optional<User> actual = userDao.readUserById(8);
 
         assertEquals(Optional.empty(), actual);
+    }
+
+    @Test
+    void testCountUsers() {
+        int actual = userDao.countUser();
+
+        assertEquals(2, actual);
     }
 }

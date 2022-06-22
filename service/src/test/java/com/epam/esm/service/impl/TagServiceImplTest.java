@@ -1,6 +1,8 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.entity.Page;
+import com.epam.esm.entity.PageMeta;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +28,7 @@ class TagServiceImplTest {
 
     @BeforeEach
     void init() {
-        tags = Set.of(new Tag(1, "food"), new Tag("summer"));
+        tags = Set.of(new Tag(1, "food"), new Tag(2, "summer"));
     }
 
     @Test
@@ -59,20 +61,47 @@ class TagServiceImplTest {
 
     @Test
     void testFindAllTags() {
-        when(tagDao.readAllTag()).thenReturn(new ArrayList<>(tags));
+        when(tagDao.readAllTag(0, 10)).thenReturn(new ArrayList<>(tags));
+        when(tagDao.countTags(Collections.emptyMap())).thenReturn(2);
 
-        List<Tag> actual = tagService.findAllTags();
+        Page<Tag> expected = new Page<>(new ArrayList<>(tags), new PageMeta(10, 2, 1, 1));
+        Page<Tag> actual = tagService.findAllTags(1, 10);
 
-        assertEquals(new ArrayList<>(tags), actual);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testFindAllTagsOnNonExistentPage() {
+        when(tagDao.countTags(Collections.emptyMap())).thenReturn(2);
+
+        assertThrows(ResourceNotFoundException.class, () -> tagService.findAllTags(3, 2));
     }
 
     @Test
     void testFindTagsByCertificateId() {
-        when(tagDao.readAllTagByCertificateId(1)).thenReturn(tags);
+        when(tagDao.readTagByCertificateId(1)).thenReturn(tags);
 
         Set<Tag> actual = tagService.findTagsByCertificateId(1);
 
         assertEquals(tags, actual);
+    }
+
+    @Test
+    void testFindTagsByCertificateIdWithPagination() {
+        when(tagDao.countTags(Map.of("id", 2))).thenReturn(2);
+        when(tagDao.readTagByCertificateId(2, 0, 10)).thenReturn(tags);
+
+        Page<Tag> expected = new Page<>(tags, new PageMeta(10, 2, 1, 1));
+        Page<Tag> actual = tagService.findTagsByCertificateId(2, 1, 10);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testFindTagsByCertificateIdWithPaginationOnNonExistentPage() {
+        when(tagDao.countTags(Map.of("id", 1))).thenReturn(2);
+
+        assertThrows(ResourceNotFoundException.class, () -> tagService.findTagsByCertificateId(1, 3, 5));
     }
 
     @Test
@@ -86,20 +115,20 @@ class TagServiceImplTest {
     }
 
     @Test
-    void testFind() {
+    void testNotFindTagById() {
+        when(tagDao.readTag(1)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> tagService.findTagById(1));
+    }
+
+    @Test
+    void testFindMostPopularHighestPriceTag() {
         List<Tag> expected = List.of(new Tag(2, "stationery"), new Tag(6, "by"));
         when(tagDao.readMostPopularHighestPriceTag()).thenReturn(expected);
 
         List<Tag> actual = tagService.findMostPopularHighestPriceTag();
 
         assertEquals(actual, expected);
-    }
-
-    @Test
-    void testNotFindTagById() {
-        when(tagDao.readTag(1)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> tagService.findTagById(1));
     }
 
     @Test

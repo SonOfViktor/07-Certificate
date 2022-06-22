@@ -1,6 +1,7 @@
 package com.epam.esm.entity;
 
 import com.epam.esm.listener.AuditListener;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -24,6 +25,7 @@ public class User {
     @Size(max = 50)
     private String lastName;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Payment> payments;
 

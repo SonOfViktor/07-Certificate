@@ -1,6 +1,7 @@
 package com.epam.esm.entity;
 
 import com.epam.esm.listener.AuditListener;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -18,10 +19,12 @@ public class Payment {
 
     private LocalDateTime createdDate;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "payment", cascade = CascadeType.PERSIST)
     private List<UserOrder> orders;
 

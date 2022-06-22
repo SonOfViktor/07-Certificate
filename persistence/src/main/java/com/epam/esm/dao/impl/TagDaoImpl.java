@@ -6,6 +6,7 @@ import com.epam.esm.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.math.BigDecimal;
 import java.util.*;
@@ -19,6 +20,7 @@ public class TagDaoImpl implements TagDao {
                     select tag from GiftCertificate cert
                     join cert.tags tag
                     where cert.giftCertificateId = :id
+                    order by tag.tagId
             """;
     public static final String DELETE_TAG_BY_ID_HQL = "delete from Tag tag where tag.tagId = :id";
     public static final String SELECT_TAG_BY_NAME_HQL = "select t from Tag t where t.name = :name";
@@ -50,14 +52,26 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public List<Tag> readAllTag() {
-        return entityManager.createQuery(SELECT_ALL_TAGS_HQL, Tag.class).getResultList();
+    public List<Tag> readAllTag(int offset, int limit) {
+        return entityManager.createQuery(SELECT_ALL_TAGS_HQL, Tag.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
     }
 
     @Override
-    public Set<Tag> readAllTagByCertificateId(int certificateId) {
-        List<Tag> tags = entityManager.createQuery(SELECT_TAGS_BY_GIFT_CERTIFICATE_ID_HQL, Tag.class)
-                .setParameter(ID, certificateId)
+    public Set<Tag> readTagByCertificateId(int certificateId) {
+        List<Tag> tags = createTagByCertificateIdQuery(certificateId)
+                .getResultList();
+
+        return new HashSet<>(tags);
+    }
+
+    @Override
+    public Set<Tag> readTagByCertificateId(int certificateId, int offset, int size) {
+        List<Tag> tags = createTagByCertificateIdQuery(certificateId)
+                .setFirstResult(offset)
+                .setMaxResults(size)
                 .getResultList();
 
         return new HashSet<>(tags);
@@ -99,9 +113,35 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
+    public int countTags(Map<String, Integer> params) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
+
+        Root<Tag> tags = criteria.from(Tag.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        if(params != null && !params.isEmpty()) {
+            ListJoin<Tag, GiftCertificate> giftCertificates = tags.join(Tag_.giftCertificates);
+            predicates.add(criteriaBuilder.equal(giftCertificates.get(GiftCertificate_.giftCertificateId), params.get(ID)));
+        }
+
+        criteria.select(criteriaBuilder.count(tags)).where(predicates.toArray(Predicate[]::new));
+
+        return entityManager.createQuery(criteria)
+                .getSingleResult()
+                .intValue();
+    }
+
+    @Override
     public int deleteTag(int id) {
         return entityManager.createQuery(DELETE_TAG_BY_ID_HQL)
                 .setParameter(ID, id)
                 .executeUpdate();
+    }
+
+    private TypedQuery<Tag> createTagByCertificateIdQuery(int certificateId) {
+        return entityManager.createQuery(SELECT_TAGS_BY_GIFT_CERTIFICATE_ID_HQL, Tag.class)
+                .setParameter(ID, certificateId);
     }
 }
