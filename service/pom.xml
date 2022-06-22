@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.epam</groupId>
-        <artifactId>rest-jpa-task</artifactId>
+        <groupId>com.epam.module4</groupId>
+        <artifactId>security-task</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
@@ -16,27 +16,21 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.epam</groupId>
+            <groupId>com.epam.module4</groupId>
             <artifactId>persistence</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>4.3.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.epam</groupId>
+            <groupId>com.epam.module4</groupId>
             <artifactId>model</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
-            <groupId>com.epam</groupId>
+            <groupId>com.epam.module4</groupId>
             <artifactId>logging</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>

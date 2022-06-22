@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "tags", schema = "module_3")
+@Table(name = "tags", schema = "module_4")
 @EntityListeners(AuditListener.class)
 public class Tag {
     @Id

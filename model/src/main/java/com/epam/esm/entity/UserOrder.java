@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 @Entity
-@Table(schema = "module_3", name = "orders")
+@Table(schema = "module_4", name = "orders")
 @EntityListeners(AuditListener.class)
 public class UserOrder {
     @Id

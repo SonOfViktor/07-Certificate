@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 @Transactional
 class TagDaoImplTest {
-    public static final String MODULE_TWO_TAG = "module_3.tags";
+    public static final String MODULE_TWO_TAG = "module_4.tags";
     private TagDao tagDao;
     private JdbcTemplate jdbcTemplate;
     private final EntityManager entityManager;

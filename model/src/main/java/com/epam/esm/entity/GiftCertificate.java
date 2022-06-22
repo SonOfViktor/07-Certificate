@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Entity
-@Table(name = "gift_certificates", schema = "module_3")
+@Table(name = "gift_certificates", schema = "module_4")
 @EntityListeners(AuditListener.class)
 public class GiftCertificate {
     private static final String DATE_JSON_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
@@ -43,7 +43,7 @@ public class GiftCertificate {
     private LocalDateTime lastUpdateDate;
 
     @ManyToMany
-    @JoinTable(name = "gift_certificate_tag", schema = "module_3",
+    @JoinTable(name = "gift_certificate_tag", schema = "module_4",
             joinColumns = @JoinColumn(name = "gift_certificate_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();

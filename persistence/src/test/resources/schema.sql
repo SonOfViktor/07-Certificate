@@ -1,8 +1,8 @@
-CREATE SCHEMA module_3;
+CREATE SCHEMA module_4;
 -- -----------------------------------------------------
--- Table `module_3`.`gift_certificates`
+-- Table `module_4`.`gift_certificates`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `module_3`.`gift_certificates`
+CREATE TABLE IF NOT EXISTS `module_4`.`gift_certificates`
 (
     `id`               INT           NOT NULL AUTO_INCREMENT,
     `name`             VARCHAR(45)   NOT NULL,
@@ -15,9 +15,9 @@ CREATE TABLE IF NOT EXISTS `module_3`.`gift_certificates`
 );
 
 -- -----------------------------------------------------
--- Table `module_3`.`tags`
+-- Table `module_4`.`tags`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `module_3`.`tags`
+CREATE TABLE IF NOT EXISTS `module_4`.`tags`
 (
     `id`   INT         NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(45) NOT NULL,
@@ -26,9 +26,9 @@ CREATE TABLE IF NOT EXISTS `module_3`.`tags`
 );
 
 -- -----------------------------------------------------
--- Table `module_3`.`gift_certificate_tag`
+-- Table `module_4`.`gift_certificate_tag`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `module_3`.`gift_certificate_tag`
+CREATE TABLE IF NOT EXISTS `module_4`.`gift_certificate_tag`
 (
     `gift_certificate_id` INT NOT NULL,
     `tag_id`              INT NOT NULL,
@@ -44,9 +44,9 @@ CREATE TABLE IF NOT EXISTS `module_3`.`gift_certificate_tag`
 );
 
 -- -----------------------------------------------------
--- Table `module_3`.`users`
+-- Table `module_4`.`users`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `module_3`.`users`
+CREATE TABLE IF NOT EXISTS `module_4`.`users`
 (
     `id`         INT         NOT NULL AUTO_INCREMENT,
     `first_name` VARCHAR(50) NOT NULL,
@@ -55,12 +55,12 @@ CREATE TABLE IF NOT EXISTS `module_3`.`users`
 );
 
 -- -----------------------------------------------------
--- Table `module_3`.`payments`
+-- Table `module_4`.`payments`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `module_3`.`payments`
+CREATE TABLE IF NOT EXISTS `module_4`.`payments`
 (
     `id`           INT          NOT NULL AUTO_INCREMENT,
-    `user_id`      INT          NOT NULL REFERENCES `module_3`.`users` (`id`)
+    `user_id`      INT          NOT NULL REFERENCES `module_4`.`users` (`id`)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     `created_date` TIMESTAMP(3) NOT NULL,
@@ -68,16 +68,16 @@ CREATE TABLE IF NOT EXISTS `module_3`.`payments`
 );
 
 -- -----------------------------------------------------
--- Table `module_3`.`orders`
+-- Table `module_4`.`orders`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `module_3`.`orders`
+CREATE TABLE IF NOT EXISTS `module_4`.`orders`
 (
     `id`                  INT           NOT NULL AUTO_INCREMENT,
     `cost`                NUMERIC(5, 2) NOT NULL CHECK (`cost` > 0),
-    `gift_certificate_id` INT           REFERENCES `module_3`.`gift_certificates` (`id`)
+    `gift_certificate_id` INT           REFERENCES `module_4`.`gift_certificates` (`id`)
         ON UPDATE CASCADE
         ON DELETE SET NULL,
-    `payment_id`          INT           NOT NULL REFERENCES `module_3`.`payments` (`id`)
+    `payment_id`          INT           NOT NULL REFERENCES `module_4`.`payments` (`id`)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     PRIMARY KEY (`id`)

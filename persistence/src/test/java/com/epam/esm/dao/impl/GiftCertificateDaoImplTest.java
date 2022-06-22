@@ -35,8 +35,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 @ActiveProfiles("test")
 @Transactional
 class GiftCertificateDaoImplTest {
-    public static final String GIFT_CERTIFICATE_TABLE = "module_3.gift_certificates";
-    public static final String GIFT_CERTIFICATE_TAG_TABLE = "module_3.gift_certificate_tag";
+    public static final String GIFT_CERTIFICATE_TABLE = "module_4.gift_certificates";
+    public static final String GIFT_CERTIFICATE_TAG_TABLE = "module_4.gift_certificate_tag";
     private final GiftCertificateDao giftCertificateDao;
     private final TagDao tagDao;
     private final JdbcTemplate jdbcTemplate;

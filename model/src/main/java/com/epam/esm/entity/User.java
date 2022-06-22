@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(schema = "module_3", name = "users")
+@Table(schema = "module_4", name = "users")
 @EntityListeners(AuditListener.class)
 public class User {
     @Id

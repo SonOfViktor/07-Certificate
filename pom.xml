@@ -10,11 +10,11 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.epam</groupId>
-    <artifactId>rest-jpa-task</artifactId>
+    <groupId>com.epam.module4</groupId>
+    <artifactId>security-task</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>rest-jpa-task</name>
-    <description>rest-jpa-task</description>
+    <name>security-task</name>
+    <description>security-task</description>
     <packaging>pom</packaging>
 
     <modules>
@@ -22,6 +22,7 @@
         <module>persistence</module>
         <module>logging</module>
         <module>service</module>
+        <module>web</module>
     </modules>
 
     <properties>
@@ -43,13 +44,11 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>6.1.0.Final</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
         </dependency>
     </dependencies>
 </project>

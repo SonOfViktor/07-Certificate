@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ActiveProfiles("test")
 @Transactional
 class UserDaoImplTest {
-    public static final String USER_TABLE = "module_3.users";
+    public static final String USER_TABLE = "module_4.users";
     private final UserDao userDao;
     private final JdbcTemplate jdbcTemplate;
 

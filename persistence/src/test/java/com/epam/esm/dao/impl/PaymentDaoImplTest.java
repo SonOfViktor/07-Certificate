@@ -26,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @Transactional
 class PaymentDaoImplTest {
-    public static final String PAYMENTS_TABLE = "module_3.payments";
-    public static final String USER_ORDER_TABLE = "module_3.orders";
+    public static final String PAYMENTS_TABLE = "module_4.payments";
+    public static final String USER_ORDER_TABLE = "module_4.orders";
     private final PaymentDao paymentDao;
     private final GiftCertificateDao giftCertificateDao;
     private final EntityManager entityManager;
