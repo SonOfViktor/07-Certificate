@@ -1,10 +1,12 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.assembler.TagModelAssembler;
-import com.epam.esm.entity.Page;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -31,13 +33,13 @@ public class TagController {
 
     private final TagService tagService;
     private final TagModelAssembler tagAssembler;
+    private final PagedResourcesAssembler<Tag> pagedResourcesTagAssembler;
 
     @GetMapping
-    public Page<EntityModel<Tag>> showAllTags(@RequestParam(required = false, defaultValue = "1") Integer page,
-                                              @RequestParam(required = false, defaultValue = "10") Integer limit) {
-        Page<Tag> tags = tagService.findAllTags(page, limit);
+    public CollectionModel<EntityModel<Tag>> showAllTags(Pageable pageable) {
+        Page<Tag> tags = tagService.findAllTags(pageable);
 
-        return tagAssembler.toPageModel(tags)
+        return pagedResourcesTagAssembler.toModel(tags, tagAssembler)
                 .add(linkTo(methodOn(TagController.class).showMostPopularHighestPriceTag()).withRel(POPULAR_TAGS))
                 .add(linkTo(GiftCertificateController.class).withRel(ALL_GIFT_CERTIFICATES))
                 .add(linkTo(methodOn(TagController.class).addTag(null)).withRel(CREATE));

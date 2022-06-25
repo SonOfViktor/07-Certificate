@@ -3,6 +3,7 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dao.PaymentDao;
+import com.epam.esm.dao.UserOrderDao;
 import com.epam.esm.dto.PaymentDto;
 import com.epam.esm.entity.*;
 import com.epam.esm.exception.ResourceNotFoundException;
@@ -11,6 +12,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +38,9 @@ class PaymentServiceImplTest {
 
     @Mock
     private GiftCertificateDao giftCertificateDao;
+
+    @Mock
+    private UserOrderDao userOrderDao;
 
     @Test
     void testCreatePayment() {
@@ -57,9 +65,9 @@ class PaymentServiceImplTest {
                 .user(user)
                 .build();
 
-        when(userDao.readUserById(1)).thenReturn(Optional.of(user));
-        when(giftCertificateDao.readGiftCertificate(1)).thenReturn(Optional.of(giftCertificate));
-        when(paymentDao.createPayment(any(Payment.class))).thenReturn(payment);
+        when(userDao.findById(1)).thenReturn(Optional.of(user));
+        when(giftCertificateDao.findById(1)).thenReturn(Optional.of(giftCertificate));
+        when(paymentDao.save(any(Payment.class))).thenReturn(payment);
 
         PaymentDto expected = new PaymentDto(
                 1, "Maks Silev",
@@ -74,7 +82,7 @@ class PaymentServiceImplTest {
     void testCreatePaymentWithoutUser() {
         List<Integer> certificateIdList = List.of(1);
 
-        when(userDao.readUserById(99)).thenReturn(Optional.empty());
+        when(userDao.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> paymentService.addPayment(99, certificateIdList));
     }
@@ -83,8 +91,8 @@ class PaymentServiceImplTest {
     void testCreatePaymentWithoutGiftCertificate() {
         List<Integer> certificateIdList = List.of(99);
 
-        when(userDao.readUserById(1)).thenReturn(Optional.of(new User()));
-        when(giftCertificateDao.readGiftCertificate(99)).thenReturn(Optional.empty());
+        when(userDao.findById(1)).thenReturn(Optional.of(new User()));
+        when(giftCertificateDao.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> paymentService.addPayment(1, certificateIdList));
     }
@@ -93,7 +101,7 @@ class PaymentServiceImplTest {
     void testFindPayment() {
         Payment payment = createPayment();
 
-        when(paymentDao.readPayment(1)).thenReturn(Optional.ofNullable(payment));
+        when(paymentDao.findById(1)).thenReturn(Optional.of(payment));
 
         PaymentDto expected = new PaymentDto(
                 1, "Maks Silev",
@@ -106,38 +114,32 @@ class PaymentServiceImplTest {
 
     @Test
     void testFindNonExistentPayment() {
-        when(paymentDao.readPayment(10)).thenReturn(Optional.empty());
+        when(paymentDao.findById(10)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> paymentService.findPayment(10));
     }
 
     @Test
     void testFindPaymentsByUserId() {
+        Pageable pageable = PageRequest.of(0, 10);
         Payment payment = createPayment();
 
-        when(paymentDao.countUserPayments(1)).thenReturn(1);
-        when(paymentDao.readPaymentByUserId(1, 0, 10)).thenReturn(List.of(payment));
+        when(paymentDao.findByUserId(1, pageable)).thenReturn(new PageImpl<>(List.of(payment), pageable, 1));
 
         List<PaymentDto> payments = List.of(new PaymentDto(
                 1, "Maks Silev",
                 List.of(new PaymentDto.UserOrderDto(1,"Oz.by", new BigDecimal("40.00"))),
                 LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0)));
 
-        Page<PaymentDto> expected = new Page<>(payments, new PageMeta(10, 1, 1, 1));
-        Page<PaymentDto> actual = paymentService.findPaymentsByUserId(1, 1, 10);
+        Page<PaymentDto> expected = new PageImpl<>(payments, pageable, 1);
+        Page<PaymentDto> actual = paymentService.findPaymentsByUserId(1, pageable);
 
         assertEquals(expected, actual);
     }
 
     @Test
-    void testFindPaymentsByUserIdOnNonExistentPage() {
-        when(paymentDao.countUserPayments(1)).thenReturn(0);
-
-        assertThrows(ResourceNotFoundException.class, () -> paymentService.findPaymentsByUserId(1, 1, 10));
-    }
-
-    @Test
     void testFindUserOrderByPaymentId() {
+        Pageable pageable = PageRequest.of(0, 10);
         GiftCertificate giftCertificate = GiftCertificate.builder()
                 .giftCertificateId(1)
                 .name("Oz.by")
@@ -150,17 +152,17 @@ class PaymentServiceImplTest {
 
         PaymentDto.UserOrderDto orderDto = new PaymentDto.UserOrderDto(1, "Oz.by", new BigDecimal("40.00"));
 
-        when(paymentDao.countPaymentOrders(3)).thenReturn(1);
-        when(paymentDao.readUserOrderByPaymentId(3, 0, 10)).thenReturn(List.of(order));
+        when(userOrderDao.findAllByPaymentId(3, pageable)).thenReturn(new PageImpl<>(List.of(order), pageable, 1));
 
-        Page<PaymentDto.UserOrderDto> expected = new Page<>(List.of(orderDto), new PageMeta(10, 1, 1, 1));
-        Page<PaymentDto.UserOrderDto> actual = paymentService.findUserOrderByPaymentId(3, 1, 10);
+        Page<PaymentDto.UserOrderDto> expected = new PageImpl<>(List.of(orderDto), pageable, 1);
+        Page<PaymentDto.UserOrderDto> actual = paymentService.findUserOrderByPaymentId(3, pageable);
 
         assertEquals(expected, actual);
     }
 
     @Test
     void testFindUserOrderByPaymentIdWithDeletedCertificate() {
+        Pageable pageable = PageRequest.of(0, 10);
         UserOrder order = UserOrder.builder()
                 .orderId(1)
                 .cost(new BigDecimal("40.00"))
@@ -169,20 +171,12 @@ class PaymentServiceImplTest {
 
         PaymentDto.UserOrderDto orderDto = new PaymentDto.UserOrderDto(0, "DELETED", new BigDecimal("40.00"));
 
-        when(paymentDao.countPaymentOrders(3)).thenReturn(1);
-        when(paymentDao.readUserOrderByPaymentId(3, 0, 10)).thenReturn(List.of(order));
+        when(userOrderDao.findAllByPaymentId(3, pageable)).thenReturn(new PageImpl<>(List.of(order), pageable, 1));
 
-        Page<PaymentDto.UserOrderDto> expected = new Page<>(List.of(orderDto), new PageMeta(10, 1, 1, 1));
-        Page<PaymentDto.UserOrderDto> actual = paymentService.findUserOrderByPaymentId(3, 1, 10);
+        Page<PaymentDto.UserOrderDto> expected = new PageImpl<>(List.of(orderDto), pageable, 1);
+        Page<PaymentDto.UserOrderDto> actual = paymentService.findUserOrderByPaymentId(3, pageable);
 
         assertEquals(expected, actual);
-    }
-
-    @Test
-    void testFindUserOrderByPaymentIdOnNonExistentPage() {
-        when(paymentDao.countPaymentOrders(3)).thenReturn(5);
-
-        assertThrows(ResourceNotFoundException.class, () -> paymentService.findUserOrderByPaymentId(3, 2, 10));
     }
 
     private Payment createPayment() {

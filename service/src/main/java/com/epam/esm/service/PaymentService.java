@@ -1,9 +1,13 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.PaymentDto;
-import com.epam.esm.entity.Page;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
+/**
+ * The interface provided methods to manage business logic related with payments.
+ */
 public interface PaymentService {
     /**
      * Add payment with gift certificates made by specified user
@@ -26,20 +30,18 @@ public interface PaymentService {
      * Find page with payments made by user with specified id
      *
      * @param userId id of the user that made payment
-     * @param page number of page with payments
-     * @param size amount objects in one page
+     * @param pageable the pageable to request a paged result, can be Pageable.unpaged(), must not be null.
      * @return page of payment dtos with info about payments made by specified user
      */
-    Page<PaymentDto> findPaymentsByUserId(int userId, int page, int size);
+    Page<PaymentDto> findPaymentsByUserId(int userId, Pageable pageable);
 
     /**
      * Find page with orders in payment with specified id
      *
      * @param paymentId payment id
-     * @param page number of page with orders
-     * @param size amount objects in one page
+     ** @param pageable the pageable to request a paged result, can be Pageable.unpaged(), must not be null.
      * @return page with order dtos with info about order in payment with specified id
      */
-    Page<PaymentDto.UserOrderDto> findUserOrderByPaymentId(int paymentId, int page, int size);
+    Page<PaymentDto.UserOrderDto> findUserOrderByPaymentId(int paymentId, Pageable pageable);
 
 }

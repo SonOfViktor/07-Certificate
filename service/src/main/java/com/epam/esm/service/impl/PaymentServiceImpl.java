@@ -3,11 +3,16 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.GiftCertificateDao;
 import com.epam.esm.dao.PaymentDao;
 import com.epam.esm.dao.UserDao;
+import com.epam.esm.dao.UserOrderDao;
 import com.epam.esm.dto.PaymentDto;
-import com.epam.esm.entity.*;
+import com.epam.esm.entity.Payment;
+import com.epam.esm.entity.User;
+import com.epam.esm.entity.UserOrder;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -23,13 +28,14 @@ public class PaymentServiceImpl implements PaymentService {
     private static final String DELETED = "DELETED";
 
     private final PaymentDao paymentDao;
+    private final UserOrderDao userOrderDao;
     private final UserDao userDao;
     private final GiftCertificateDao giftCertificateDao;
 
     @Override
     public PaymentDto addPayment(int userId, List<Integer> giftCertificateIdList) {
-        User user = userDao.readUserById(userId).orElseThrow(() ->
-                new ResourceNotFoundException("There is no user with Id " + userId + " in database"));
+        User user = userDao.findById(userId).orElseThrow(() ->
+                new ResourceNotFoundException("There is no user with id " + userId + " in database"));
 
         Payment payment = Payment.builder()
                 .createdDate(LocalDateTime.now())
@@ -37,67 +43,47 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
         payment.setOrders(createUserOrders(giftCertificateIdList));
 
-        Payment createdPayment = paymentDao.createPayment(payment);
+        Payment createdPayment = paymentDao.save(payment);
 
         return mapPaymentOnDto(createdPayment);
     }
 
     @Override
     public PaymentDto findPayment(int paymentId) {
-        Payment payment = paymentDao.readPayment(paymentId).orElseThrow(() ->
-                new ResourceNotFoundException("There is no payment with Id " + paymentId + " in database"));
+        Payment payment = paymentDao.findById(paymentId).orElseThrow(() ->
+                new ResourceNotFoundException("There is no payment with id " + paymentId + " in database"));
 
         return mapPaymentOnDto(payment);
     }
 
     @Override
-    public Page<PaymentDto> findPaymentsByUserId(int userId, int page, int size) {
-        int orderTotalElements = paymentDao.countUserPayments(userId);
-        int totalPages = (int) Math.ceil((double) orderTotalElements / size);
+    public Page<PaymentDto> findPaymentsByUserId(int userId, Pageable pageable) {
 
-        if (page > totalPages) {
-            throw new ResourceNotFoundException("There is no payment in the database for " + page + " page");
-        }
-
-        PageMeta pageMeta = new PageMeta(size, orderTotalElements, totalPages, page);
-
-        int offset = page * size - size;
-        List<PaymentDto> paymentDtoList = paymentDao.readPaymentByUserId(userId, offset, size)
-                .stream()
-                .map(this::mapPaymentOnDto)
-                .toList();
-
-        return new Page<>(paymentDtoList, pageMeta);
+        return paymentDao.findByUserId(userId, pageable)
+                .map(this::mapPaymentOnDto);
     }
 
-    public Page<PaymentDto.UserOrderDto> findUserOrderByPaymentId(int paymentId, int page, int size) {
-        int orderTotalElements = paymentDao.countPaymentOrders(paymentId);
-        int totalPages = (int) Math.ceil((double) orderTotalElements / size);
+    @Override
+    public Page<PaymentDto.UserOrderDto> findUserOrderByPaymentId(int paymentId, Pageable pageable) {
 
-        if (page > totalPages) {
-            throw new ResourceNotFoundException("There is no orders in the database for " + page + " page");
-        }
-
-        PageMeta pageMeta = new PageMeta(size, orderTotalElements, totalPages, page);
-
-        int offset = page * size - size;
-        List<PaymentDto.UserOrderDto> orders = createUserOrderDtoList(paymentDao.readUserOrderByPaymentId(paymentId, offset, size));
-
-        return new Page<>(orders, pageMeta);
+        return userOrderDao.findAllByPaymentId(paymentId, pageable)
+                .map(this::createUserOrderPage);
     }
 
     private PaymentDto mapPaymentOnDto(Payment payment) {
+
         return new PaymentDto(
                 payment.getPaymentId(),
                 (payment.getUser().getFirstName() + SPACE + payment.getUser().getLastName()),
-                createUserOrderDtoList(payment.getOrders()),
+                payment.getOrders().stream().map(this::createUserOrderPage).toList(),
                 payment.getCreatedDate()
         );
     }
 
     private List<UserOrder> createUserOrders(List<Integer> giftCertificateIdList) {
+
         return giftCertificateIdList.stream()
-                .map(id -> giftCertificateDao.readGiftCertificate(id).orElseThrow(() ->
+                .map(id -> giftCertificateDao.findById(id).orElseThrow(() ->
                         new ResourceNotFoundException("There is no certificate with Id " + id + " in database")))
                 .map(gc -> UserOrder.builder()
                         .cost(gc.getPrice())
@@ -106,17 +92,15 @@ public class PaymentServiceImpl implements PaymentService {
                 .toList();
     }
 
-    private List<PaymentDto.UserOrderDto> createUserOrderDtoList(List<UserOrder> orders) {
-        return orders.stream()
-                .map(order -> new PaymentDto.UserOrderDto(
-                        (order.getGiftCertificate() != null) ?
-                                order.getGiftCertificate().getGiftCertificateId() :
-                                INTEGER_ZERO,
-                        (order.getGiftCertificate() != null) ?
-                                order.getGiftCertificate().getName() :
-                                DELETED,
-                        order.getCost()))
-                .toList();
-    }
+    private PaymentDto.UserOrderDto createUserOrderPage(UserOrder order) {
 
+        return new PaymentDto.UserOrderDto(
+                (order.getGiftCertificate() != null) ?
+                        order.getGiftCertificate().getGiftCertificateId() :
+                        INTEGER_ZERO,
+                (order.getGiftCertificate() != null) ?
+                        order.getGiftCertificate().getName() :
+                        DELETED,
+                order.getCost());
+    }
 }
