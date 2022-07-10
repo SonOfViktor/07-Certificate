@@ -67,7 +67,7 @@ public class GiftCertificateController {
     }
 
     @PostMapping
-    public CollectionModel<EntityModel<GiftCertificate>> showCertificateWithParameters(
+    public CollectionModel<EntityModel<GiftCertificate>> showCertificateWithFilter(
             Pageable pageable,
             @Valid @RequestBody(required = false) GiftCertificateFilter queryParam) {
 

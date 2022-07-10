@@ -71,8 +71,8 @@ public class ServiceLoggingAspect {
     public void logExceptionAllServiceMethod(JoinPoint joinPoint, Exception exception) {
         MethodMetadata methodMetadata = takeMethodMetadata(joinPoint);
 
-        log.error("Method {}() from class {} thrown exception {}",
-                methodMetadata.methodName(), methodMetadata.className(), exception);
+        log.error("Method {}() from class {} thrown exception {}: {}",
+                methodMetadata.methodName(), methodMetadata.className(), exception.getClass(), exception.getMessage());
     }
 
     private MethodMetadata takeMethodMetadata(JoinPoint joinPoint) {

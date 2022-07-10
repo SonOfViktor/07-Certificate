@@ -28,13 +28,22 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     public GiftCertificate addGiftCertificate(GiftCertificate certificate) {
+        LocalDateTime createTime = LocalDateTime.now();
+        certificate.setCreateDate(createTime);
+        certificate.setLastUpdateDate(createTime);
+
         return giftCertificateDao.save(certificate);
     }
 
     @Override
     public Page<GiftCertificate> findAllCertificates(Pageable pageable) {
+        Page<GiftCertificate> certificates = giftCertificateDao.findAll(pageable);
 
-        return giftCertificateDao.findAll(pageable);
+        if(certificates.isEmpty()) {
+            throw new ResourceNotFoundException("There are no certificates on " + pageable.getPageNumber() + " page");
+        }
+
+        return certificates;
     }
 
     @Override

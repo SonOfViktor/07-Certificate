@@ -33,15 +33,16 @@ public class PaymentServiceImpl implements PaymentService {
     private final GiftCertificateDao giftCertificateDao;
 
     @Override
-    public PaymentDto addPayment(int userId, List<Integer> giftCertificateIdList) {
-        User user = userDao.findById(userId).orElseThrow(() ->
-                new ResourceNotFoundException("There is no user with id " + userId + " in database"));
+    public PaymentDto addPayment(String username, List<Integer> giftCertificateIdList) {
+        List<UserOrder> orders = createUserOrders(giftCertificateIdList);
+        User user = userDao.findByEmail(username).orElseThrow(() ->
+                new ResourceNotFoundException("There is no user with username " + username + " in database"));
 
         Payment payment = Payment.builder()
                 .createdDate(LocalDateTime.now())
                 .user(user)
                 .build();
-        payment.setOrders(createUserOrders(giftCertificateIdList));
+        payment.setOrders(orders);
 
         Payment createdPayment = paymentDao.save(payment);
 
@@ -58,16 +59,28 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Page<PaymentDto> findPaymentsByUserId(int userId, Pageable pageable) {
-
-        return paymentDao.findByUserId(userId, pageable)
+        Page<PaymentDto> payments = paymentDao.findByUserId(userId, pageable)
                 .map(this::mapPaymentOnDto);
+
+        if (payments.isEmpty()) {
+            throw new ResourceNotFoundException("User with id " + userId + " has no payments on " +
+                    pageable.getPageNumber() + " page");
+        }
+
+        return payments;
     }
 
     @Override
     public Page<PaymentDto.UserOrderDto> findUserOrderByPaymentId(int paymentId, Pageable pageable) {
-
-        return userOrderDao.findAllByPaymentId(paymentId, pageable)
+        Page<PaymentDto.UserOrderDto> orders = userOrderDao.findAllByPaymentId(paymentId, pageable)
                 .map(this::createUserOrderPage);
+
+        if (orders.isEmpty()) {
+            throw new ResourceNotFoundException("Payment with id " + paymentId + " has no orders on " +
+                    pageable.getPageNumber() + " page");
+        }
+
+        return orders;
     }
 
     private PaymentDto mapPaymentOnDto(Payment payment) {

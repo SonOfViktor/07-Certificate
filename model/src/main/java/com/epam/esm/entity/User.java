@@ -2,10 +2,7 @@ package com.epam.esm.entity;
 
 import com.epam.esm.listener.AuditListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -15,8 +12,10 @@ import java.util.Objects;
 @Entity
 @Table(schema = "module_4", name = "users")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter @Setter
 @ToString
+@Builder
 @EntityListeners(AuditListener.class)
 public class User {
     @Id
@@ -25,12 +24,25 @@ public class User {
     private int userId;
 
     @NotBlank
+    @Size(max = 255)
+    private String email;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @NotBlank
+    @Size(max = 100)
+    private String password;
+
+    @NotBlank
     @Size(max = 50)
     private String firstName;
 
     @NotBlank
     @Size(max = 50)
     private String lastName;
+
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
     @JsonIgnore
     @ToString.Exclude
@@ -48,11 +60,11 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return userId == user.userId && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName);
+        return Objects.equals(email, user.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, firstName, lastName);
+        return Objects.hash(email);
     }
 }

@@ -27,11 +27,11 @@ public class GiftCertificate {
     @Column(name = "id")
     private int giftCertificateId;
 
-    @NotNull(groups = ForCreate.class)
+    @NotBlank(groups = ForCreate.class)
     @Size(min = 3, max = 45)
     private String name;
 
-    @NotNull(groups = ForCreate.class)
+    @NotBlank(groups = ForCreate.class)
     @Size(max = 500)
     private String description;
 

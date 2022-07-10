@@ -10,13 +10,13 @@ import java.util.List;
  */
 public interface PaymentService {
     /**
-     * Add payment with gift certificates made by specified user
+     * Add payment with gift certificates made by authenticated user
      *
-     * @param userId if of a user that makes a payment
+     * @param username the username of authenticated user
      * @param giftCertificateIdList gift certificate ids that user wants to buy
      * @return payment dto with info about made payment
      */
-    PaymentDto addPayment(int userId, List<Integer> giftCertificateIdList);
+    PaymentDto addPayment(String username, List<Integer> giftCertificateIdList);
 
     /**
      * Find payment with specified id

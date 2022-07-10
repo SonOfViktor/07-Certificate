@@ -9,7 +9,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.*;
+import javax.persistence.EntityExistsException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -19,18 +24,40 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Tag addTag(Tag tag) {
+        if (tagDao.existsByName(tag.getName()))
+            throw new EntityExistsException("The tag with name " + tag.getName() +
+                    " has already been existed in database");
+
         return tagDao.save(tag);
     }
 
     @Override
     public Set<Tag> addTags(Set<Tag> tags) {
-        return (tags != null) ? new HashSet<>(tagDao.saveAll(tags)) : Collections.emptySet();
+        Set<Tag> savedTags = Collections.emptySet();
+
+        if (tags != null) {
+            savedTags = tags.stream()
+                    .map(this::saveTagIgnoringTheSame)
+                    .collect(Collectors.toSet());
+        }
+
+        return savedTags;
+    }
+
+    private Tag saveTagIgnoringTheSame(Tag tag) {
+        return tagDao.findOneByName(tag.getName())
+                .orElseGet(() -> tagDao.save(tag));
     }
 
     @Override
     public Page<Tag> findAllTags(Pageable pageable) {
+        Page<Tag> tags = tagDao.findAll(pageable);
 
-        return tagDao.findAll(pageable);
+        if (tags.isEmpty()) {
+            throw new ResourceNotFoundException("There are no tags on " + pageable.getPageNumber() + " page");
+        }
+
+        return tags;
     }
 
     @Override
@@ -41,12 +68,18 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Page<Tag> findTagsByCertificateId(int certificateId, Pageable pageable) {
+        Page<Tag> tags = tagDao.findAllByGiftCertificatesId(certificateId, pageable);
 
-        return tagDao.findAllByGiftCertificatesId(certificateId, pageable);
+        if (tags.isEmpty()) {
+            throw new ResourceNotFoundException("Certificate with id " + certificateId + " has no tags on " +
+                    pageable.getPageNumber() + " page");
+        }
+
+        return tags;
     }
 
     @Override
-    public Tag findTagById(int tagId){
+    public Tag findTagById(int tagId) {
         Optional<Tag> tagOptional = tagDao.findById(tagId);
 
         return tagOptional.orElseThrow(() ->

@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -36,4 +38,20 @@ public interface TagDao extends JpaRepository<Tag, Integer>, TagDaoFilter {
      */
     @Query(SELECT_TAGS_BY_GIFT_CERTIFICATE_ID_HQL)
     Page<Tag> findAllByGiftCertificatesId(int id, Pageable pageable);
+
+    /**
+     * Check if tag with specified name exists in database
+     *
+     * @param name the tag name
+     * @return true if tag with specified name exists in database
+     */
+    boolean existsByName(String name);
+
+    /**
+     * Read tag with the specified name
+     *
+     * @param name the name of a tag
+     * @return optional with found tag with specified name if exists or empty optional otherwise
+     */
+    Optional<Tag> findOneByName(String name);
 }

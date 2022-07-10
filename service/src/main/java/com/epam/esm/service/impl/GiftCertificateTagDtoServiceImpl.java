@@ -25,9 +25,10 @@ public class GiftCertificateTagDtoServiceImpl implements GiftCertificateTagDtoSe
     public CertificateTagsDto addGiftCertificateTagDto(CertificateTagsDto certificateTagsDto) {
         GiftCertificate certificate = certificateTagsDto.certificate();
         Set<Tag> tags = certificateTagsDto.tags();
-        certificate.setTags(tags);
 
         Set<Tag> createdTags = tagService.addTags(tags);
+
+        certificate.setTags(createdTags);
         GiftCertificate createdCertificate = giftCertificateService.addGiftCertificate(certificate);
 
         return new CertificateTagsDto(createdCertificate, createdTags);

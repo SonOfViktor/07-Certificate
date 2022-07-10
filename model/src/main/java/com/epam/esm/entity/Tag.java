@@ -2,9 +2,11 @@ package com.epam.esm.entity;
 
 import com.epam.esm.listener.AuditListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +23,7 @@ public class Tag {
     @Column(name = "id")
     private int tagId;
 
-    @NotNull
+    @NotBlank
     @Size(min = 2, max = 45)
     private String name;
 

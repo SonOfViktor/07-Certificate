@@ -68,6 +68,15 @@ class GiftCertificateServiceImplTest {
     }
 
     @Test
+    void testFindAllCertificatesNotExistedPage() {
+        when(giftCertificateDao.findAll(PageRequest.of(100, 10))).thenReturn(Page.empty());
+
+        PageRequest pageable = PageRequest.of(100, 10);
+
+        assertThrows(ResourceNotFoundException.class, () -> giftCertificateService.findAllCertificates(pageable));
+    }
+
+    @Test
     void testFindCertificatesWithParams() {
         GiftCertificateFilter filter =  new GiftCertificateFilter(List.of("food"), "e",
                 "e");
