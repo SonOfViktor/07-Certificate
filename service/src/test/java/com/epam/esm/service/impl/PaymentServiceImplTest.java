@@ -65,7 +65,7 @@ class PaymentServiceImplTest {
                 .user(user)
                 .build();
 
-        when(userDao.findById(1)).thenReturn(Optional.of(user));
+        when(userDao.findByEmail("user@mail.com")).thenReturn(Optional.of(user));
         when(giftCertificateDao.findById(1)).thenReturn(Optional.of(giftCertificate));
         when(paymentDao.save(any(Payment.class))).thenReturn(payment);
 
@@ -73,7 +73,7 @@ class PaymentServiceImplTest {
                 1, "Maks Silev",
                 List.of(new PaymentDto.UserOrderDto(1, "Oz.by", new BigDecimal("40.00"))),
                 LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0));
-        PaymentDto actual = paymentService.addPayment(1, List.of(1));
+        PaymentDto actual = paymentService.addPayment("user@mail.com", List.of(1));
 
         assertEquals(expected, actual);
     }
@@ -82,19 +82,21 @@ class PaymentServiceImplTest {
     void testCreatePaymentWithoutUser() {
         List<Integer> certificateIdList = List.of(1);
 
-        when(userDao.findById(99)).thenReturn(Optional.empty());
+        when(userDao.findByEmail("absent@mail.com")).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> paymentService.addPayment(99, certificateIdList));
+        assertThrows(ResourceNotFoundException.class, () ->
+                paymentService.addPayment("absent@mail.com", certificateIdList));
     }
 
     @Test
     void testCreatePaymentWithoutGiftCertificate() {
         List<Integer> certificateIdList = List.of(99);
 
-        when(userDao.findById(1)).thenReturn(Optional.of(new User()));
+        when(userDao.findByEmail("username@mail.com")).thenReturn(Optional.of(new User()));
         when(giftCertificateDao.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> paymentService.addPayment(1, certificateIdList));
+        assertThrows(ResourceNotFoundException.class, () ->
+                paymentService.addPayment("username@mail.com", certificateIdList));
     }
 
     @Test
@@ -138,6 +140,14 @@ class PaymentServiceImplTest {
     }
 
     @Test
+    void testFindPaymentsByUserIdNotExistedPage() {
+        Pageable pageable = PageRequest.of(100, 10);
+        when(paymentDao.findByUserId(1, pageable)).thenReturn(Page.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> paymentService.findPaymentsByUserId(1, pageable));
+    }
+
+    @Test
     void testFindUserOrderByPaymentId() {
         Pageable pageable = PageRequest.of(0, 10);
         GiftCertificate giftCertificate = GiftCertificate.builder()
@@ -177,6 +187,14 @@ class PaymentServiceImplTest {
         Page<PaymentDto.UserOrderDto> actual = paymentService.findUserOrderByPaymentId(3, pageable);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void testFindUserOrderByPaymentIdNotExistedPage() {
+        Pageable pageable = PageRequest.of(100, 10);
+        when(userOrderDao.findAllByPaymentId(3, pageable)).thenReturn(Page.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> paymentService.findUserOrderByPaymentId(3, pageable));
     }
 
     private Payment createPayment() {
