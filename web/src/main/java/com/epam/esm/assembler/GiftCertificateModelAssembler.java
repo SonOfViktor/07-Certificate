@@ -2,7 +2,6 @@ package com.epam.esm.assembler;
 
 import com.epam.esm.controller.GiftCertificateController;
 import com.epam.esm.dto.CertificateTagsDto;
-import com.epam.esm.entity.GiftCertificate;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.lang.NonNull;
@@ -13,19 +12,19 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class GiftCertificateModelAssembler implements
-        RepresentationModelAssembler<CertificateTagsDto, EntityModel<GiftCertificate>> {
+        RepresentationModelAssembler<CertificateTagsDto, EntityModel<CertificateTagsDto>> {
     public static final String TAGS = "tags";
 
     @Override
     @NonNull
-    public EntityModel<GiftCertificate> toModel(@NonNull CertificateTagsDto entity) {
+    public EntityModel<CertificateTagsDto> toModel(@NonNull CertificateTagsDto entity) {
 
-        return EntityModel.of(entity.certificate(),
+        return EntityModel.of(entity,
                         linkTo(methodOn(GiftCertificateController.class)
-                                .showCertificate(entity.certificate().getGiftCertificateId()))
+                                .showCertificate(entity.giftCertificateId()))
                                 .withSelfRel())
                 .addIf(!entity.tags().isEmpty(), () -> linkTo(GiftCertificateController.class)
-                        .slash(entity.certificate().getGiftCertificateId())
+                        .slash(entity.giftCertificateId())
                         .slash(TAGS)
                         .withRel(TAGS));
     }

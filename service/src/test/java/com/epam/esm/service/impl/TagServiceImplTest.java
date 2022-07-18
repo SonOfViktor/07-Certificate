@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import javax.persistence.EntityExistsException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,26 +34,43 @@ class TagServiceImplTest {
 
     @BeforeEach
     void init() {
-        tags = List.of(new Tag(1, "food"), new Tag(2, "summer"));
+        tags = List.of(Tag.builder().tagId(1).name("food").build(),
+                Tag.builder().tagId(2).name("summer").build());
     }
 
     @Test
     void testAddTag() {
-        Tag tag = new Tag();
-        when(tagDao.save(tag)).thenReturn(new Tag(1, "new"));
+        TagDto tagDto = new TagDto(0, "new");
+        Tag tag = Tag.builder().name("new").build();
+        Tag expected = Tag.builder().tagId(1).name("new").build();
 
-        Tag expected = new Tag(1, "new");
-        Tag actual = tagService.addTag(tag);
+        when(tagDao.save(tag)).thenReturn(expected);
+
+        Tag actual = tagService.addTag(tagDto);
 
         assertEquals(expected, actual);
     }
 
     @Test
-    void testAddTags() {
-        when(tagDao.saveAll(new HashSet<>(tags))).thenReturn(List.of(new Tag(1, "new")));
+    void testAddExistedTag() {
+        TagDto tagDto = new TagDto(0, "new");
+        Tag tag = Tag.builder().name("new").build();
+        when(tagDao.existsByName(tag.getName())).thenReturn(true);
 
-        Set<Tag> expected = Set.of(new Tag(1, "new"));
-        Set<Tag> actual = tagService.addTags(new HashSet<>(tags));
+        assertThrows(EntityExistsException.class, () -> tagService.addTag(tagDto));
+    }
+
+    @Test
+    void testAddTags() {
+        Set<TagDto> tagDtoSet = Set.of(new TagDto(0, "new"));
+        Tag tag = Tag.builder().name("new").build();
+        Tag createdTag = Tag.builder().tagId(1).name("new").build();
+
+        when(tagDao.save(tag)).thenReturn(createdTag);
+        when(tagDao.findOneByName("new")).thenReturn(Optional.empty());
+
+        Set<Tag> expected = Set.of(createdTag);
+        Set<Tag> actual = tagService.addTags(tagDtoSet);
 
         assertEquals(expected, actual);
     }
@@ -113,12 +132,11 @@ class TagServiceImplTest {
 
     @Test
     void testFindMostPopularHighestPriceTag() {
-        List<Tag> expected = List.of(new Tag(2, "stationery"), new Tag(6, "by"));
-        when(tagDao.readMostPopularHighestPriceTag()).thenReturn(expected);
+        when(tagDao.readMostPopularHighestPriceTag()).thenReturn(tags);
 
         List<Tag> actual = tagService.findMostPopularHighestPriceTag();
 
-        assertEquals(actual, expected);
+        assertEquals(tags, actual);
     }
 
     @Test

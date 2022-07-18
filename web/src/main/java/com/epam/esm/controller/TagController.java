@@ -1,6 +1,7 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.assembler.TagModelAssembler;
+import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +68,7 @@ public class TagController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityModel<Tag> addTag(@Valid @RequestBody Tag tag) {
+    public EntityModel<Tag> addTag(@Valid @RequestBody TagDto tag) {
         Tag newTag = tagService.addTag(tag);
 
         return tagAssembler.toModel(newTag).add(linkTo(TagController.class).withRel(ALL_TAGS));

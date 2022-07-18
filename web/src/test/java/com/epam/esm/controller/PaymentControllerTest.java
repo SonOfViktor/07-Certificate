@@ -8,9 +8,9 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -110,7 +110,6 @@ class PaymentControllerTest {
     @Test
     @WithMockUser(username = "Ivan_Pupkin@gmail.com")
     @Transactional
-    @Rollback
     void testCreatePayment() throws Exception {
         mockMvc.perform(post("/payments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +145,7 @@ class PaymentControllerTest {
                 .andExpectAll(status().isNotFound(),
                         content().contentType(MediaType.APPLICATION_JSON),
                         jsonPath("$.fieldError.exception_message")
-                                .value(is("There is no certificate with Id 10 in database")),
+                                .value(is("There is no certificate with id 10 in database")),
                         jsonPath("$.errorCode").value(is(40401)));
     }
 

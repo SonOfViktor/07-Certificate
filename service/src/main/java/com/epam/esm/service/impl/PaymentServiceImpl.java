@@ -26,6 +26,7 @@ import static org.apache.commons.lang3.math.NumberUtils.INTEGER_ZERO;
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
     private static final String DELETED = "DELETED";
+    private static final String NOT_FOUND_BY_ID_MESSAGE = "There is no %s with id %d in database";
 
     private final PaymentDao paymentDao;
     private final UserOrderDao userOrderDao;
@@ -36,7 +37,7 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentDto addPayment(String username, List<Integer> giftCertificateIdList) {
         List<UserOrder> orders = createUserOrders(giftCertificateIdList);
         User user = userDao.findByEmail(username).orElseThrow(() ->
-                new ResourceNotFoundException("There is no user with username " + username + " in database"));
+                new ResourceNotFoundException("User with username " + username + " is not found"));
 
         Payment payment = Payment.builder()
                 .createdDate(LocalDateTime.now())
@@ -52,7 +53,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentDto findPayment(int paymentId) {
         Payment payment = paymentDao.findById(paymentId).orElseThrow(() ->
-                new ResourceNotFoundException("There is no payment with id " + paymentId + " in database"));
+                new ResourceNotFoundException(String.format(NOT_FOUND_BY_ID_MESSAGE, "payment", paymentId)));
 
         return mapPaymentOnDto(payment);
     }
@@ -97,7 +98,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         return giftCertificateIdList.stream()
                 .map(id -> giftCertificateDao.findById(id).orElseThrow(() ->
-                        new ResourceNotFoundException("There is no certificate with Id " + id + " in database")))
+                        new ResourceNotFoundException(String.format(NOT_FOUND_BY_ID_MESSAGE, "certificate", id))))
                 .map(gc -> UserOrder.builder()
                         .cost(gc.getPrice())
                         .giftCertificate(gc)

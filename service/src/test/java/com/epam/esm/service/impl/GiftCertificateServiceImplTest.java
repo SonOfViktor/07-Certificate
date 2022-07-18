@@ -32,6 +32,7 @@ import static org.mockito.Mockito.*;
 class GiftCertificateServiceImplTest {
     private Page<GiftCertificate> certificates;
     private List<GiftCertificate> certificateList;
+    private Set<Tag> tags;
 
     @InjectMocks
     private GiftCertificateServiceImpl giftCertificateService;
@@ -47,15 +48,19 @@ class GiftCertificateServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10);
         certificateList = List.of(new GiftCertificate(), new GiftCertificate());
         certificates = new PageImpl<>(certificateList, pageable, 2);
+        tags = Set.of(Tag.builder().tagId(1).name("tag1").build(),
+                Tag.builder().tagId(2).name("tag2").build());
     }
 
     @Test
     void testAddGiftCertificate() {
         GiftCertificate expected = new GiftCertificate();
-        when(giftCertificateDao.save(new GiftCertificate())).thenReturn(expected);
+        when(giftCertificateDao.save(any(GiftCertificate.class))).thenReturn(expected);
         GiftCertificate actual = giftCertificateService.addGiftCertificate(expected);
 
-        assertEquals(expected, actual);
+        assertThat(actual).usingRecursiveComparison()
+                .ignoringFields("createDate", "lastUpdateDate")
+                .isEqualTo(expected);
     }
 
     @Test
@@ -135,7 +140,7 @@ class GiftCertificateServiceImplTest {
                 .price(new BigDecimal("40"))
                 .description("new description")
                 .duration(20)
-                .tags(Set.of(new Tag(1, "tag1"), new Tag(2, "tag2")))
+                .tags(tags)
                 .build();
         when(giftCertificateDao.findById(anyInt())).thenReturn(Optional.of(certificate));
 
@@ -144,7 +149,7 @@ class GiftCertificateServiceImplTest {
                 .description("new description")
                 .price(new BigDecimal("40"))
                 .duration(20)
-                .tags(Set.of(new Tag(1, "tag1"), new Tag(2, "tag2")))
+                .tags(tags)
                 .build();
         GiftCertificate actual = giftCertificateService.updateGiftCertificate(newCertificate, 1);
 
@@ -160,7 +165,7 @@ class GiftCertificateServiceImplTest {
                 .price(new BigDecimal("40"))
                 .description("new description")
                 .duration(20)
-                .tags(Set.of(new Tag(1, "tag1"), new Tag(2, "tag2")))
+                .tags(tags)
                 .build();
         GiftCertificate newCertificate = GiftCertificate.builder()
                 .name("  ")
@@ -178,7 +183,7 @@ class GiftCertificateServiceImplTest {
                 .description("new description")
                 .price(new BigDecimal("40"))
                 .duration(20)
-                .tags(Set.of(new Tag(1, "tag1"), new Tag(2, "tag2")))
+                .tags(tags)
                 .build();
 
         assertThat(actual).usingRecursiveComparison()

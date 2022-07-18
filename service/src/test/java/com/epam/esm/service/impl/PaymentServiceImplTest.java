@@ -82,8 +82,6 @@ class PaymentServiceImplTest {
     void testCreatePaymentWithoutUser() {
         List<Integer> certificateIdList = List.of(1);
 
-        when(userDao.findByEmail("absent@mail.com")).thenReturn(Optional.empty());
-
         assertThrows(ResourceNotFoundException.class, () ->
                 paymentService.addPayment("absent@mail.com", certificateIdList));
     }
@@ -92,7 +90,6 @@ class PaymentServiceImplTest {
     void testCreatePaymentWithoutGiftCertificate() {
         List<Integer> certificateIdList = List.of(99);
 
-        when(userDao.findByEmail("username@mail.com")).thenReturn(Optional.of(new User()));
         when(giftCertificateDao.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () ->

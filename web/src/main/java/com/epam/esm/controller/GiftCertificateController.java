@@ -3,7 +3,6 @@ package com.epam.esm.controller;
 import com.epam.esm.assembler.GiftCertificateModelAssembler;
 import com.epam.esm.assembler.TagModelAssembler;
 import com.epam.esm.dto.CertificateTagsDto;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.GiftCertificateFilter;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.GiftCertificateService;
@@ -48,7 +47,7 @@ public class GiftCertificateController {
     private final PagedResourcesAssembler<Tag> pagedResourcesTagAssembler;
 
     @GetMapping("/{id}")
-    public EntityModel<GiftCertificate> showCertificate(@PathVariable @Positive int id) {
+    public EntityModel<CertificateTagsDto> showCertificate(@PathVariable @Positive int id) {
         CertificateTagsDto giftCertificateTagDto = certificateTagService.findGiftCertificateTagDto(id);
 
         return certificateAssembler.toModel(giftCertificateTagDto)
@@ -67,7 +66,7 @@ public class GiftCertificateController {
     }
 
     @PostMapping
-    public CollectionModel<EntityModel<GiftCertificate>> showCertificateWithFilter(
+    public CollectionModel<EntityModel<CertificateTagsDto>> showCertificateWithFilter(
             Pageable pageable,
             @Valid @RequestBody(required = false) GiftCertificateFilter queryParam) {
 
@@ -82,7 +81,7 @@ public class GiftCertificateController {
 
     @PostMapping("/creating")
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityModel<GiftCertificate> addCertificate(@Validated({ForCreate.class, Default.class})
+    public EntityModel<CertificateTagsDto> addCertificate(@Validated({ForCreate.class, Default.class})
                                                        @RequestBody CertificateTagsDto certificateTagsDto) {
 
         CertificateTagsDto newCertificateTagsDto = certificateTagService.addGiftCertificateTagDto(certificateTagsDto);
@@ -93,7 +92,7 @@ public class GiftCertificateController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EntityModel<GiftCertificate> updateCertificate(@Valid @RequestBody CertificateTagsDto certificateTagDto,
+    public EntityModel<CertificateTagsDto> updateCertificate(@Valid @RequestBody CertificateTagsDto certificateTagDto,
                                                           @PathVariable @Positive int id) {
         CertificateTagsDto updatedCertificateTagsDto =
                 certificateTagService.updateGiftCertificateTagDto(certificateTagDto, id);

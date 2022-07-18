@@ -1,16 +1,15 @@
 package com.epam.esm.entity;
 
 import com.epam.esm.listener.AuditListener;
-import com.epam.esm.validategroup.ForCreate;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import javax.persistence.*;
-import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "gift_certificates", schema = "module_4")
@@ -20,44 +19,30 @@ import java.util.*;
 @Builder
 @EntityListeners(AuditListener.class)
 public class GiftCertificate {
-    private static final String DATE_JSON_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int giftCertificateId;
 
-    @NotBlank(groups = ForCreate.class)
-    @Size(min = 3, max = 45)
     private String name;
 
-    @NotBlank(groups = ForCreate.class)
-    @Size(max = 500)
     private String description;
 
-    @Positive
-    @Digits(integer = 3, fraction = 2)
     private BigDecimal price;
 
-    @Positive(groups = ForCreate.class)
-    @Digits(integer = 2, fraction = 0)
     private int duration;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_JSON_PATTERN)
     private LocalDateTime createDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_JSON_PATTERN)
     private LocalDateTime lastUpdateDate;
 
     @Builder.Default
-    @JsonIgnore
     @ManyToMany
     @JoinTable(name = "gift_certificate_tag", schema = "module_4",
             joinColumns = @JoinColumn(name = "gift_certificate_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
 
-    @JsonIgnore
     @OneToMany(mappedBy = "giftCertificate")
     private List<UserOrder> userOrders;
 

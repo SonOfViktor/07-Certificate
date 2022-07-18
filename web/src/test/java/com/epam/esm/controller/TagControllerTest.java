@@ -8,7 +8,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,12 +106,35 @@ class TagControllerTest {
 
     @Test
     @Transactional
-    @Rollback
     @WithMockUser(roles = "ADMIN")
     void testAddTag() throws Exception {
         mockMvc.perform(post("/tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"tag\"}"))
+                .andDo(log())
+                .andExpectAll(status().isCreated(),
+                        content().contentType(MediaTypes.HAL_JSON),
+                        jsonPath("$.name").value("tag"));
+
+        mockMvc.perform(get("/tags"))
+                .andDo(log())
+                .andExpectAll(status().isOk(),
+                        content().contentType(MediaTypes.HAL_JSON),
+                        jsonPath("$..tags.size()").value(7),
+                        jsonPath("$._links.self.href").value(is("http://localhost/tags?page=0&size=20")),
+                        jsonPath("$..tags[*].name")
+                                .value(containsInAnyOrder("food", "stationery", "shoe", "virtual", "paper", "by", "tag")));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(roles = "ADMIN")
+    void testAddTagWithId() throws Exception {
+        mockMvc.perform(post("/tags")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{" +
+                                "\"tagId\": 3," +
+                                "\"name\": \"tag\"}"))
                 .andDo(log())
                 .andExpectAll(status().isCreated(),
                         content().contentType(MediaTypes.HAL_JSON),
@@ -178,7 +200,6 @@ class TagControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     @Transactional
-    @Rollback
     void testDeleteTag() throws Exception {
         mockMvc.perform(delete("/tags/{id}", 1))
                 .andDo(log())

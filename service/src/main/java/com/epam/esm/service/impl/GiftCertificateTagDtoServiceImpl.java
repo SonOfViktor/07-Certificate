@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dto.CertificateTagsDto;
+import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.GiftCertificateFilter;
 import com.epam.esm.entity.Tag;
@@ -12,7 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -23,15 +26,15 @@ public class GiftCertificateTagDtoServiceImpl implements GiftCertificateTagDtoSe
 
     @Override
     public CertificateTagsDto addGiftCertificateTagDto(CertificateTagsDto certificateTagsDto) {
-        GiftCertificate certificate = certificateTagsDto.certificate();
-        Set<Tag> tags = certificateTagsDto.tags();
+        GiftCertificate certificate = mapGiftCertificateTagDtoOnGiftCertificate(certificateTagsDto);
+        Set<TagDto> tags = certificateTagsDto.tags();
 
         Set<Tag> createdTags = tagService.addTags(tags);
 
         certificate.setTags(createdTags);
         GiftCertificate createdCertificate = giftCertificateService.addGiftCertificate(certificate);
 
-        return new CertificateTagsDto(createdCertificate, createdTags);
+        return createCertificateTagsDto(createdCertificate, createdTags);
     }
 
     @Override
@@ -53,27 +56,48 @@ public class GiftCertificateTagDtoServiceImpl implements GiftCertificateTagDtoSe
         GiftCertificate certificate = giftCertificateService.findCertificateById(certificateId);
         Set<Tag> tags = tagService.findTagsByCertificateId(certificateId);
 
-        return new CertificateTagsDto(certificate, tags);
+        return createCertificateTagsDto(certificate, tags);
     }
 
     @Override
     public CertificateTagsDto updateGiftCertificateTagDto(CertificateTagsDto certificateTagsDto, int id) {
-        GiftCertificate certificate = certificateTagsDto.certificate();
+        GiftCertificate certificate = mapGiftCertificateTagDtoOnGiftCertificate(certificateTagsDto);
 
-        Set<Tag> tags = tagService.findTagsByCertificateId(id);
-        if (certificateTagsDto.tags() != null) {
-            tags.addAll(certificateTagsDto.tags());
-        }
+        Set<TagDto> tags = createSetTagDto(tagService.findTagsByCertificateId(id));
+
+        Optional.ofNullable(certificateTagsDto.tags())
+                .ifPresent(tags::addAll);
 
         Set<Tag> updatedTags = tagService.addTags(tags);
         certificate.setTags(updatedTags);
         GiftCertificate updatedCertificate = giftCertificateService.updateGiftCertificate(certificate, id);
 
-        return new CertificateTagsDto(updatedCertificate, updatedTags);
+        return createCertificateTagsDto(updatedCertificate, updatedTags);
     }
 
     private Page<CertificateTagsDto> convertCertificateToCertificateTagsDtoInPage(Page<GiftCertificate> certificates) {
         return certificates.map(cert ->
-                new CertificateTagsDto(cert, tagService.findTagsByCertificateId(cert.getGiftCertificateId())));
+                createCertificateTagsDto(cert, tagService.findTagsByCertificateId(cert.getGiftCertificateId())));
+    }
+
+    private GiftCertificate mapGiftCertificateTagDtoOnGiftCertificate(CertificateTagsDto dto) {
+        return GiftCertificate.builder()
+                .name(dto.name())
+                .description(dto.description())
+                .duration(dto.duration())
+                .price(dto.price())
+                .build();
+    }
+
+    private CertificateTagsDto createCertificateTagsDto(GiftCertificate certificate, Set<Tag> tags) {
+        return new CertificateTagsDto(certificate.getGiftCertificateId(), certificate.getName(),
+                certificate.getDescription(), certificate.getPrice(), certificate.getDuration(),
+                certificate.getCreateDate(), certificate.getLastUpdateDate(), createSetTagDto(tags));
+    }
+
+    private Set<TagDto> createSetTagDto(Set<Tag> tags) {
+        return tags.stream()
+                .map(tag -> new TagDto(tag.getTagId(), tag.getName())).
+                collect(Collectors.toSet());
     }
 }

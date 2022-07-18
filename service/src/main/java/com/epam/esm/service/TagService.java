@@ -1,11 +1,12 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
+import javax.persistence.EntityExistsException;
 import java.util.List;
 import java.util.Set;
 
@@ -14,26 +15,28 @@ import java.util.Set;
  */
 public interface TagService {
     /**
-     * Add specified tag.
+     * Add specified tag.`
      *
      * @param tag the tag to add
-     * @return the tag with generated id by database
+     * @return the tag dto with generated id by database
+     * @throws EntityExistsException if tag has already been created
      */
-    Tag addTag(Tag tag);
+    Tag addTag(TagDto tag);
 
     /**
      * Add specified tags.
      *
-     * @param tags list with tags to add
+     * @param tags set with tag dtos to add
      * @return the set of tags with generated id by database
      */
-    Set<Tag> addTags(Set<Tag> tags);
+    Set<Tag> addTags(Set<TagDto> tags);
 
     /**
      * Find specified page with tags.
      *
      * @param pageable the pageable to request a paged result, can be Pageable.unpaged(), must not be null.
      * @return the page with tags
+     * @throws ResourceNotFoundException if there are no tags on specified page
      */
     Page<Tag> findAllTags(Pageable pageable);
 
@@ -51,6 +54,7 @@ public interface TagService {
      * @param certificateId gift certificate id
      * @param pageable the pageable to request a paged result, can be Pageable.unpaged(), must not be null.
      * @return the page with tags related to gift certificate with specified id
+     * @throws ResourceNotFoundException if there are no tags by specified certificate id or on specified page
      */
     Page<Tag> findTagsByCertificateId(int certificateId, Pageable pageable);
 

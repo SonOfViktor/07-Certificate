@@ -93,9 +93,9 @@ class GiftCertificateControllerTest {
                 .andDo(log())
                 .andExpectAll(status().isOk(),
                         content().contentType(MediaTypes.HAL_JSON),
-                        jsonPath("$..giftCertificates.size()").value(3),
-                        jsonPath("$..giftCertificates[*].name").value(contains("Belvest", "Evroopt", "Evroopt")),
-                        jsonPath("$..giftCertificates[2].description")
+                        jsonPath("$..certificateTagsDtoes.size()").value(3),
+                        jsonPath("$..certificateTagsDtoes[*].name").value(contains("Belvest", "Evroopt", "Evroopt")),
+                        jsonPath("$..certificateTagsDtoes[2].description")
                                 .value("Buy two bananas"),
                         jsonPath("$._links.self.href")
                                 .value(is("http://localhost/certificates?page=0&size=20&sort=name,asc&sort=createDate,desc")));
@@ -107,8 +107,8 @@ class GiftCertificateControllerTest {
                 .andDo(log())
                 .andExpectAll(status().isOk(),
                         content().contentType(MediaTypes.HAL_JSON),
-                        jsonPath("$..giftCertificates.size()").value(4),
-                        jsonPath("$..giftCertificates[*].name")
+                        jsonPath("$..certificateTagsDtoes.size()").value(4),
+                        jsonPath("$..certificateTagsDtoes[*].name")
                                 .value(containsInAnyOrder("Oz.by", "Belvest", "Evroopt", "Evroopt")),
                         jsonPath("$._links.self.href")
                                 .value(is("http://localhost/certificates?page=0&size=20")));
@@ -137,12 +137,10 @@ class GiftCertificateControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                    "certificate" : {
-                                        "name" : "Epam",
-                                        "description" : "Make another Gift Certificate application",
-                                        "price" : 20,
-                                        "duration" : 10
-                                    },
+                                    "name" : "Epam",
+                                    "description" : "Make another Gift Certificate application",
+                                    "price" : 20,
+                                    "duration" : 10,
                                     "tags" : [
                                         {"name" : "it"},
                                         {"name" : "by"}
@@ -165,17 +163,14 @@ class GiftCertificateControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     @Transactional
-    @Rollback
     void testAddCertificateWithNotValidBodyData() throws Exception {
         mockMvc.perform(post("/certificates/creating")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                    "certificate" : {
-                                        "name" : "     ",
-                                        "price" : 0,
-                                        "duration" : -10
-                                    },
+                                    "name" : "     ",
+                                    "price" : 0,
+                                    "duration" : -10,
                                     "tags" : [
                                         {"name" : null},
                                         {"name" : "  "}
@@ -184,13 +179,13 @@ class GiftCertificateControllerTest {
                 .andDo(log())
                 .andExpectAll(status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        jsonPath("$.fieldError['certificate.name']")
+                        jsonPath("$.fieldError['name']")
                                 .value(is("must not be blank")),
-                        jsonPath("$.fieldError['certificate.description']")
+                        jsonPath("$.fieldError['description']")
                                 .value(is("must not be blank")),
-                        jsonPath("$.fieldError['certificate.price']")
+                        jsonPath("$.fieldError['price']")
                                 .value(is("must be greater than 0")),
-                        jsonPath("$.fieldError['certificate.duration']")
+                        jsonPath("$.fieldError['duration']")
                                 .value(is("must be greater than 0")),
                         jsonPath("$.fieldError['tags[].name']")
                                 .value(is("must not be blank, must not be blank")));
@@ -222,18 +217,15 @@ class GiftCertificateControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     @Transactional
-    @Rollback
     void testUpdateCertificate() throws Exception {
         mockMvc.perform(patch("/certificates/{id}", 2)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                    "certificate" : {
-                                        "name" : "MaxCompany",
-                                        "description" : "Update success",
-                                        "price" : 99,
-                                        "duration" : 99
-                                    },
+                                    "name" : "MaxCompany",
+                                    "description" : "Update success",
+                                    "price" : 99,
+                                    "duration" : 99,
                                     "tags" : [
                                         {"name" : "new"},
                                         {"name" : "food"}
@@ -262,14 +254,11 @@ class GiftCertificateControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     @Transactional
-    @Rollback
     void testUpdateCertificateTags() throws Exception {
         mockMvc.perform(patch("/certificates/{id}", 2)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                    "certificate" : {
-                                    },
                                     "tags" : [
                                         {"name" : "new"},
                                         {"name" : "food"}
@@ -290,14 +279,10 @@ class GiftCertificateControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     @Transactional
-    @Rollback
     void testUpdateNotExistedCertificate() throws Exception {
         mockMvc.perform(patch("/certificates/{id}", 10)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "certificate" : {}
-                                }"""))
+                        .content("{}"))
                 .andDo(log())
                 .andExpectAll(status().isNotFound(),
                         content().contentType(MediaType.APPLICATION_JSON),
@@ -331,7 +316,6 @@ class GiftCertificateControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     @Transactional
-    @Rollback
     void testDeleteCertificate() throws Exception {
         mockMvc.perform(delete("/certificates/{id}", 1))
                 .andDo(log())
@@ -340,8 +324,8 @@ class GiftCertificateControllerTest {
         mockMvc.perform(post("/certificates"))
                 .andDo(log())
                 .andExpectAll(
-                        jsonPath("$..giftCertificates.size()").value(3),
-                        jsonPath("$..giftCertificates[*].name")
+                        jsonPath("$..certificateTagsDtoes.size()").value(3),
+                        jsonPath("$..certificateTagsDtoes[*].name")
                                 .value(containsInAnyOrder("Belvest", "Evroopt", "Evroopt")));
     }
 

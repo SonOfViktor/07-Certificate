@@ -14,25 +14,31 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Aspect
+
 public class ServiceLoggingAspect {
     @Pointcut("execution(*..CertificateTagsDto com.epam.esm.service.*..update*(..))")
-    public void updateServiceMethodPointcut() {
+    private void updateServiceMethodPointcut() {
+        // pointcut body must be empty
     }
 
     @Pointcut("execution(int com.epam.esm.service.*..delete*(int))")
-    public void deleteServiceMethodPointcut() {
+    private void deleteServiceMethodPointcut() {
+        // pointcut body must be empty
     }
 
     @Pointcut("execution(* com.epam.esm.service.*..find*(..))")
-    public void findDtoServiceMethodPointcut() {
+    private void findDtoServiceMethodPointcut() {
+        // pointcut body must be empty
     }
 
     @Pointcut("execution(*..*Dto com.epam.esm.service.*..add*(..))")
-    public void addServiceMethodPointcut() {
+    private void addServiceMethodPointcut() {
+        // pointcut body must be empty
     }
 
     @Pointcut("execution(* com.epam.esm.service.impl.*.*(..))")
-    public void allServiceMethodPointcut() {
+    private void allServiceMethodPointcut() {
+        // pointcut body must be empty
     }
 
     @AfterReturning(pointcut = "updateServiceMethodPointcut()", returning = "result")
