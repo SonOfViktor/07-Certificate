@@ -11,8 +11,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -139,7 +138,7 @@ class TagControllerTest {
                 .andExpectAll(status().isCreated(),
                         content().contentType(MediaTypes.HAL_JSON),
                         jsonPath("$.name").value("tag"),
-                        jsonPath("$._links.self.href").value("http://localhost/tags/7"));
+                        jsonPath("$._links.self.href").value(not("http://localhost/tags/3")));
     }
 
     @Test

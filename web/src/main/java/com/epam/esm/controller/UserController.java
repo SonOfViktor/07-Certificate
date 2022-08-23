@@ -41,6 +41,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserController {
     public static final String USERS = "users";
     public static final String CREATE = "create";
+    public static final String LOGIN = "login";
 
     private final UserService userService;
     private final PaymentService paymentService;
@@ -75,6 +76,7 @@ public class UserController {
     public EntityModel<User> createUser(@Valid @RequestBody UserDto userDto) {
         User user = userService.createUser(createUserWithUserDto(userDto));
         return userAssembler.toModel(user)
+                .add(linkTo(methodOn(UserController.class).authenticate(null)).withRel(LOGIN))
                 .add(linkTo(UserController.class).withRel(USERS));
     }
 

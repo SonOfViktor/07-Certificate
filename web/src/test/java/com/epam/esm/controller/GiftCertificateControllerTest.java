@@ -131,7 +131,7 @@ class GiftCertificateControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    @Rollback
+    @Transactional
     void testAddCertificate() throws Exception {
         mockMvc.perform(post("/certificates/creating")
                         .contentType(MediaType.APPLICATION_JSON)
