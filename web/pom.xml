@@ -13,6 +13,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>web</name>
     <description>web</description>
+    <packaging>war</packaging>
 
     <dependencies>
         <dependency>
@@ -23,6 +24,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-hateoas</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -73,6 +80,7 @@
     </dependencies>
 
     <build>
+        <finalName>${project.parent.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

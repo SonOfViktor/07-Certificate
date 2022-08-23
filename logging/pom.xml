@@ -14,6 +14,10 @@
     <name>logging</name>
     <description>logging</description>
 
+    <properties>
+        <sonar.coverage.exclusions>**/*.*</sonar.coverage.exclusions>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.epam.module4</groupId>
