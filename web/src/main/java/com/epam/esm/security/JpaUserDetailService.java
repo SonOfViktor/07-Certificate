@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
-
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.springframework.security.core.userdetails.User.withUsername;
 
 @Component
@@ -45,7 +45,7 @@ public class JpaUserDetailService implements UserDetailsService {
     private UserDetails createUserDetailsFromJwtToken(String jwtToken) {
         return withUsername(jwtTokenProvider.getUsername(jwtToken))
                 .authorities(jwtTokenProvider.getRole(jwtToken))
-                .password("")
+                .password(EMPTY)
                 .accountExpired(false)
                 .accountLocked(false)
                 .credentialsExpired(false)
