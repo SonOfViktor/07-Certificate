@@ -25,7 +25,7 @@ public class SecurityExceptionAdviceController {
     public static final String SECURITY_AUTHENTICATION_ERROR = "security.authentication_error";
     private static final String BAD_CREDENTIALS_ERROR = "security.bad_credentials_error";
     private static final String USERNAME_NOT_FOUND_ERROR = "security.username_not_found";
-    private static final String EXCEPTION_MESSAGE_MAP_KEY = "exception_message";
+    private static final String EXCEPTION_MESSAGE_MAP_KEY = "exceptionMessage";
 
     private final MessageSource messageSource;
 

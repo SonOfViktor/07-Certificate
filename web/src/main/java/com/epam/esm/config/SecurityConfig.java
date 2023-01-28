@@ -1,6 +1,7 @@
 package com.epam.esm.config;
 
 import com.epam.esm.filter.JwtTokenFilter;
+import com.epam.esm.filter.SpaWebFilter;
 import com.epam.esm.security.JpaUserDetailService;
 import com.epam.esm.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ import static com.epam.esm.entity.UserRole.USER;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final int BCRYPT_STRENGTH = 12;
+    private static final String API_PREFIX = "/api/v1";
     private final JwtTokenProvider jwtTokenProvider;
     private final JpaUserDetailService jpaUserDetailService;
     private final HandlerExceptionResolver handlerExceptionResolver;
@@ -44,18 +46,19 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeRequests(authorizeRequest -> authorizeRequest
-                        .antMatchers("/").permitAll()
-                        .antMatchers(HttpMethod.GET,"/certificates/**").permitAll()
-                        .mvcMatchers(HttpMethod.POST,"/certificates").permitAll()
-                        .mvcMatchers("/users/login", "/users/signup").anonymous()
-                        .mvcMatchers(HttpMethod.POST, "/payments").hasAnyRole(USER.name(), ADMIN.name())
-                        .mvcMatchers("/certificate/creating").hasRole(ADMIN.name())
+                        .antMatchers(HttpMethod.GET, API_PREFIX + "/certificates/**",
+                                API_PREFIX + "/categories/**").permitAll()
+                        .antMatchers(HttpMethod.POST,API_PREFIX + "/certificates").permitAll()
+                        .antMatchers(API_PREFIX + "/users/login", API_PREFIX + "/users/signup").anonymous()
+                        .antMatchers(HttpMethod.POST, API_PREFIX + "/payments").hasAnyRole(USER.name(), ADMIN.name())
+                        .antMatchers(API_PREFIX + "/certificate/creating").hasRole(ADMIN.name())
                         .antMatchers(HttpMethod.POST).hasRole(ADMIN.name())
                         .antMatchers(HttpMethod.DELETE).hasRole(ADMIN.name())
                         .antMatchers(HttpMethod.PATCH).hasRole(ADMIN.name())
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtTokenFilter(jwtTokenProvider, jpaUserDetailService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new SpaWebFilter(), JwtTokenFilter.class)
                 .build();
     }
 

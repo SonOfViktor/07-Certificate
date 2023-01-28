@@ -1,7 +1,6 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
-import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.TagService;
@@ -24,8 +23,8 @@ public class TagServiceImpl implements TagService {
     private final TagDao tagDao;
 
     @Override
-    public Tag addTag(TagDto tagDto) {
-        Tag tag = mapTagDtoOnTag(tagDto);
+    public Tag addTag(String tagName) {
+        Tag tag = mapTagNameOnTag(tagName);
 
         if (tagDao.existsByName(tag.getName()))
             throw new EntityExistsException("The tag with name " + tag.getName() +
@@ -35,12 +34,12 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Set<Tag> addTags(Set<TagDto> tags) {
+    public Set<Tag> addTags(Set<String> tags) {
         Set<Tag> savedTags = Collections.emptySet();
 
         if (tags != null) {
             savedTags = tags.stream()
-                    .map(this::mapTagDtoOnTag)
+                    .map(this::mapTagNameOnTag)
                     .map(this::saveTagIgnoringTheSame)
                     .collect(Collectors.toSet());
         }
@@ -100,9 +99,9 @@ public class TagServiceImpl implements TagService {
         tagDao.deleteById(tagId);
     }
 
-    private Tag mapTagDtoOnTag(TagDto tagDto) {
+    private Tag mapTagNameOnTag(String tagName) {
         return Tag.builder()
-                .name(tagDto.name())
+                .name(tagName)
                 .build();
     }
 }

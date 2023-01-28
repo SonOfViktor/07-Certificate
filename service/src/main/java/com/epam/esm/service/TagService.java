@@ -1,6 +1,5 @@
 package com.epam.esm.service;
 
-import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -17,19 +16,19 @@ public interface TagService {
     /**
      * Add specified tag.`
      *
-     * @param tag the tag to add
-     * @return the tag dto with generated id by database
+     * @param tagName the name of tag to add
+     * @return the tag with generated id by database
      * @throws EntityExistsException if tag has already been created
      */
-    Tag addTag(TagDto tag);
+    Tag addTag(String tagName);
 
     /**
-     * Add specified tags.
+     * Add tags with specified names.
      *
-     * @param tags set with tag dtos to add
+     * @param tagNames set of tag names to add
      * @return the set of tags with generated id by database
      */
-    Set<Tag> addTags(Set<TagDto> tags);
+    Set<Tag> addTags(Set<String> tagNames);
 
     /**
      * Find specified page with tags.

@@ -2,9 +2,11 @@ package com.epam.esm.controller;
 
 import com.epam.esm.assembler.PaymentModelAssembler;
 import com.epam.esm.assembler.UserModelAssembler;
+import com.epam.esm.dto.SecurityUserDto;
+import com.epam.esm.dto.UserReadDto;
 import com.epam.esm.entity.AuthenticationRequestBody;
 import com.epam.esm.dto.PaymentDto;
-import com.epam.esm.dto.UserDto;
+import com.epam.esm.dto.UserWriteDto;
 import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserRole;
 import com.epam.esm.security.JwtTokenProvider;
@@ -22,21 +24,19 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.util.Collections;
-import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Validated
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
     public static final String USERS = "users";
@@ -54,27 +54,34 @@ public class UserController {
     private final PagedResourcesAssembler<PaymentDto> pagedResourcesPaymentDtoAssembler;
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> authenticate(@Valid @RequestBody AuthenticationRequestBody requestDto) {
+    public ResponseEntity<UserReadDto> authenticate(@Valid @RequestBody AuthenticationRequestBody requestDto) {
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(requestDto.email(), requestDto.password()));
-        UserDetails principal = (UserDetails) authenticate.getPrincipal();
+        SecurityUserDto principal = (SecurityUserDto) authenticate.getPrincipal();
 
         return principal.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .findFirst()
-                .map(role -> jwtTokenProvider.createToken(principal.getUsername(), role))
-                .map(token -> Map.of(
-                        "email", principal.getUsername(),
-                        "token", token))
+                .map(role -> {
+                    String token = jwtTokenProvider.createToken(principal.getUsername(), role);
+                    return UserReadDto.builder()
+                            .id(principal.getUserId())
+                            .email(principal.getUsername())
+                            .firstName(principal.getFirstName())
+                            .lastName(principal.getLastName())
+                            .role(role)
+                            .token(token)
+                            .build();
+                })
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new IllegalArgumentException("Registered user " + requestDto.email() + " has no role"));
     }
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityModel<User> createUser(@Valid @RequestBody UserDto userDto) {
-        User user = userService.createUser(createUserWithUserDto(userDto));
+    public EntityModel<User> createUser(@Valid @RequestBody UserWriteDto userWriteDto) {
+        User user = userService.createUser(createUserWithUserDto(userWriteDto));
         return userAssembler.toModel(user)
                 .add(linkTo(methodOn(UserController.class).authenticate(null)).withRel(LOGIN))
                 .add(linkTo(UserController.class).withRel(USERS));
@@ -88,8 +95,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/payments")
-    public CollectionModel<EntityModel<PaymentDto>> showUserPayments(@PathVariable @Positive Integer userId, Pageable pageable) {
-
+    public CollectionModel<EntityModel<PaymentDto>> showUserPayments(@PathVariable @Positive Integer userId,
+                                                                     Pageable pageable) {
         Page<PaymentDto> paymentsByUserId = paymentService.findPaymentsByUserId(userId, pageable);
 
         return pagedResourcesPaymentDtoAssembler.toModel(paymentsByUserId, paymentAssembler)
@@ -97,12 +104,12 @@ public class UserController {
                 .add(linkTo(methodOn(PaymentController.class).createPayment(null)).withRel(CREATE));
     }
 
-    private User createUserWithUserDto(UserDto userDto) {
+    private User createUserWithUserDto(UserWriteDto userWriteDto) {
         return User.builder()
-                .email(userDto.email())
-                .firstName(userDto.firstName())
-                .lastName(userDto.lastName())
-                .password(encoder.encode(userDto.password()))
+                .email(userWriteDto.email())
+                .firstName(userWriteDto.firstName())
+                .lastName(userWriteDto.lastName())
+                .password(encoder.encode(userWriteDto.password()))
                 .role(UserRole.USER)
                 .payments(Collections.emptyList())
                 .build();

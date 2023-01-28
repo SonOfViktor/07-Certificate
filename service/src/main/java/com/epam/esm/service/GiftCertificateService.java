@@ -1,11 +1,13 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.FileImageDto;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.GiftCertificateFilter;
 import com.epam.esm.exception.ResourceNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.util.Optional;
 
 /**
  * The interface provide methods to control business logic related with gift certificates
@@ -15,9 +17,10 @@ public interface GiftCertificateService {
      * Add specified gift certificate.
      *
      * @param certificate the certificate to add
+     * @param image content and meta data of image file
      * @return the gift certificate with generated id by database
      */
-    GiftCertificate addGiftCertificate(GiftCertificate certificate);
+    GiftCertificate addGiftCertificate(GiftCertificate certificate, FileImageDto image);
 
     /**
      * Find gift certificates for specified page.
@@ -50,12 +53,21 @@ public interface GiftCertificateService {
     /**
      * Update gift certificate with specified id.
      *
-     * @param certificate the certificate with new data
      * @param id          the id of updated gift certificate
+     * @param certificate the certificate with new data
+     * @param optionalImage content and metadata of image file if user pass it
      * @return 1 if specified gift certificate was deleted
      * @throws ResourceNotFoundException if gift certificate wasn't found
      */
-    GiftCertificate updateGiftCertificate(GiftCertificate certificate, int id);
+    GiftCertificate updateGiftCertificate(int id, GiftCertificate certificate, Optional<FileImageDto> optionalImage);
+
+    /**
+     * Find gift certificate image with specified id.
+     *
+     * @param id          the id of gift certificate
+     * @return image as array of bytes if gift certificate image file exists otherwise Optional.empty()
+     */
+    Optional<byte[]> findCertificateImage(int id);
 
     /**
      * Delete gift certificate with specified id.

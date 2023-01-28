@@ -5,12 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "payments", schema = "module_4")
+@Table(name = "payments", schema = "module_7")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter
@@ -41,10 +40,6 @@ public class Payment {
         this.user = user;
     }
 
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate.truncatedTo(ChronoUnit.MILLIS);
-    }
-
     public void setOrders(List<UserOrder> orders) {
         this.orders = orders;
         this.orders.forEach(order -> order.setPayment(this));
@@ -55,8 +50,7 @@ public class Payment {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Payment payment = (Payment) o;
-        return paymentId == payment.paymentId &&
-                Objects.equals(createdDate, payment.createdDate) &&
+        return  Objects.equals(createdDate, payment.createdDate) &&
                 Objects.equals(user, payment.user);
     }
 

@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.epam.module4</groupId>
-        <artifactId>security-task</artifactId>
+        <groupId>com.epam.module7</groupId>
+        <artifactId>certificate</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
@@ -30,7 +30,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.epam.module4</groupId>
+            <groupId>com.epam.module7</groupId>
             <artifactId>model</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>

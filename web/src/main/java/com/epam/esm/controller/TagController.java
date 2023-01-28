@@ -1,7 +1,6 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.assembler.TagModelAssembler;
-import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +14,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("/tags")
+@RequestMapping("/api/v1/tags")
 @Validated
 @RequiredArgsConstructor
 public class TagController {
@@ -68,8 +69,8 @@ public class TagController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityModel<Tag> addTag(@Valid @RequestBody TagDto tag) {
-        Tag newTag = tagService.addTag(tag);
+    public EntityModel<Tag> addTag( @RequestBody @Valid @NotBlank @Size(min = 3, max = 15) String tagName) {
+        Tag newTag = tagService.addTag(tagName);
 
         return tagAssembler.toModel(newTag).add(linkTo(TagController.class).withRel(ALL_TAGS));
     }

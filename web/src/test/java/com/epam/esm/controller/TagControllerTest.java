@@ -1,5 +1,6 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.config.MockConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,44 +17,46 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = MockConfig.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 class TagControllerTest {
+    private static final String API_PREFIX = "/api/v1";
+
     @Autowired
     MockMvc mockMvc;
 
     @Test
     @WithMockUser
     void testShowAllTags() throws Exception {
-        mockMvc.perform(get("/tags"))
+        mockMvc.perform(get(API_PREFIX + "/tags"))
                 .andDo(log())
                 .andExpectAll(status().isOk(),
                         content().contentType(MediaTypes.HAL_JSON),
                         jsonPath("$..tags.size()").value(6),
-                        jsonPath("$._links.self.href").value(is("http://localhost/tags?page=0&size=20")),
+                        jsonPath("$._links.self.href").value(is("http://localhost/api/v1/tags?page=0&size=20")),
                         jsonPath("$..tags[*].name")
-                                .value(containsInAnyOrder("food", "stationery", "shoe", "virtual", "paper", "by")));
+                                .value(containsInAnyOrder("food", "stationery", "shoe", "virtual", "paper", "game")));
     }
 
     @Test
     @WithMockUser
     void testShowAllTagsWithPagination() throws Exception {
-        mockMvc.perform(get("/tags?page=2&size=2"))
+        mockMvc.perform(get(API_PREFIX + "/tags?page=2&size=2"))
                 .andDo(log())
                 .andExpectAll(status().isOk(),
                         content().contentType(MediaTypes.HAL_JSON),
                         jsonPath("$..tags.size()").value(2),
-                        jsonPath("$._links.self.href").value(is("http://localhost/tags?page=2&size=2")),
+                        jsonPath("$._links.self.href").value(is("http://localhost/api/v1/tags?page=2&size=2")),
                         jsonPath("$..tags[*].name").value(containsInAnyOrder("stationery", "virtual")));
     }
 
     @Test
     @WithAnonymousUser
     void testShowAllTagsByAnonymous() throws Exception {
-        mockMvc.perform(get("/tags"))
+        mockMvc.perform(get(API_PREFIX + "/tags"))
                 .andDo(log())
                 .andExpectAll(status().isUnauthorized(),
-                        jsonPath("$.fieldError.exception_message")
+                        jsonPath("$.fieldError.exceptionMessage")
                                 .value(is("Full authentication is required to access this resource")),
                         jsonPath("$.errorCode").value(is(40101)));
     }
@@ -61,22 +64,22 @@ class TagControllerTest {
     @Test
     @WithMockUser
     void testShowTag() throws Exception {
-        mockMvc.perform(get("/tags/{id}", 3))
+        mockMvc.perform(get(API_PREFIX + "/tags/{id}", 3))
                 .andDo(log())
                 .andExpectAll(status().isOk(),
                         content().contentType(MediaTypes.HAL_JSON),
                         jsonPath("$..name").value("shoe"),
-                        jsonPath("$._links.self.href").value(is("http://localhost/tags/3")));
+                        jsonPath("$._links.self.href").value(is("http://localhost/api/v1/tags/3")));
     }
 
     @Test
     @WithMockUser
     void testShowNotExistedTag() throws Exception {
-        mockMvc.perform(get("/tags/{id}", 10))
+        mockMvc.perform(get(API_PREFIX + "/tags/{id}", 10))
                 .andDo(log())
                 .andExpectAll(status().isNotFound(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        jsonPath("$.fieldError.exception_message")
+                        jsonPath("$.fieldError.exceptionMessage")
                                 .value(is("Tag with id 10 wasn't found")),
                         jsonPath("$.errorCode").value(is(40401)));
     }
@@ -84,11 +87,11 @@ class TagControllerTest {
     @Test
     @WithAnonymousUser
     void testShowTagByAnonymous() throws Exception {
-        mockMvc.perform(get("/tags/{id}", 3))
+        mockMvc.perform(get(API_PREFIX + "/tags/{id}", 3))
                 .andDo(log())
                 .andExpectAll(status().isUnauthorized(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        jsonPath("$.fieldError.exception_message")
+                        jsonPath("$.fieldError.exceptionMessage")
                                 .value(is("Full authentication is required to access this resource")),
                         jsonPath("$.errorCode").value(is(40101)));
     }
@@ -96,75 +99,59 @@ class TagControllerTest {
     @Test
     @WithMockUser
     void testShowMostPopularHighestPriceTag() throws Exception {
-        mockMvc.perform(get("/tags/highest"))
+        mockMvc.perform(get(API_PREFIX + "/tags/highest"))
                 .andExpectAll(status().isOk(),
                         content().contentType(MediaTypes.HAL_JSON),
                         jsonPath("$..tags[*].name")
-                                .value(containsInAnyOrder("stationery", "paper", "by")));
+                                .value(containsInAnyOrder("stationery", "paper", "game")));
     }
 
     @Test
     @Transactional
     @WithMockUser(roles = "ADMIN")
     void testAddTag() throws Exception {
-        mockMvc.perform(post("/tags")
+        mockMvc.perform(post(API_PREFIX + "/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"tag\"}"))
+                        .content("tag"))
                 .andDo(log())
                 .andExpectAll(status().isCreated(),
                         content().contentType(MediaTypes.HAL_JSON),
                         jsonPath("$.name").value("tag"));
 
-        mockMvc.perform(get("/tags"))
+        mockMvc.perform(get(API_PREFIX + "/tags"))
                 .andDo(log())
                 .andExpectAll(status().isOk(),
                         content().contentType(MediaTypes.HAL_JSON),
                         jsonPath("$..tags.size()").value(7),
-                        jsonPath("$._links.self.href").value(is("http://localhost/tags?page=0&size=20")),
+                        jsonPath("$._links.self.href").value(is("http://localhost/api/v1/tags?page=0&size=20")),
                         jsonPath("$..tags[*].name")
-                                .value(containsInAnyOrder("food", "stationery", "shoe", "virtual", "paper", "by", "tag")));
-    }
-
-    @Test
-    @Transactional
-    @WithMockUser(roles = "ADMIN")
-    void testAddTagWithId() throws Exception {
-        mockMvc.perform(post("/tags")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{" +
-                                "\"tagId\": 3," +
-                                "\"name\": \"tag\"}"))
-                .andDo(log())
-                .andExpectAll(status().isCreated(),
-                        content().contentType(MediaTypes.HAL_JSON),
-                        jsonPath("$.name").value("tag"),
-                        jsonPath("$._links.self.href").value(not("http://localhost/tags/3")));
+                                .value(containsInAnyOrder("food", "stationery", "shoe", "virtual", "paper", "game", "tag")));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void testAddTagWithNotValidBodyData() throws Exception {
-        mockMvc.perform(post("/tags")
+        mockMvc.perform(post(API_PREFIX + "/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"t\"}"))
+                        .content("t"))
                 .andDo(log())
                 .andExpectAll(status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        jsonPath("$.fieldError.name")
-                                .value(is("size must be between 2 and 45")),
-                        jsonPath("$.errorCode").value(is(40015)));
+                        jsonPath("$.fieldError.exceptionMessage")
+                                .value(is("addTag.tagName: size must be between 3 and 15")),
+                        jsonPath("$.errorCode").value(is(40020)));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
     void testAddExistedTag() throws Exception {
-        mockMvc.perform(post("/tags")
+        mockMvc.perform(post(API_PREFIX + "/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"food\"}"))
+                        .content("food"))
                 .andDo(log())
                 .andExpectAll(status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        jsonPath("$.fieldError.exception_message")
+                        jsonPath("$.fieldError.exceptionMessage")
                                 .value(is("The tag with name food has already been existed in database")),
                         jsonPath("$.errorCode").value(is(40035)));
     }
@@ -172,26 +159,26 @@ class TagControllerTest {
     @Test
     @WithMockUser
     void testAddTagByUserRole() throws Exception {
-        mockMvc.perform(post("/tags")
+        mockMvc.perform(post(API_PREFIX + "/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"tag\"}"))
+                        .content("tag"))
                 .andDo(log())
                 .andExpectAll(status().isForbidden(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        jsonPath("$.fieldError.exception_message").value(is("Access is denied")),
+                        jsonPath("$.fieldError.exceptionMessage").value(is("Access is denied")),
                         jsonPath("$.errorCode").value(is(40301)));
     }
 
     @Test
     @WithAnonymousUser
     void testAddTagByAnonymous() throws Exception {
-        mockMvc.perform(post("/tags")
+        mockMvc.perform(post(API_PREFIX + "/tags")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"tag\"}"))
+                        .content("tag"))
                 .andDo(log())
                 .andExpectAll(status().isUnauthorized(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        jsonPath("$.fieldError.exception_message")
+                        jsonPath("$.fieldError.exceptionMessage")
                                 .value(is("Full authentication is required to access this resource")),
                         jsonPath("$.errorCode").value(is(40101)));
     }
@@ -200,11 +187,11 @@ class TagControllerTest {
     @WithMockUser(roles = "ADMIN")
     @Transactional
     void testDeleteTag() throws Exception {
-        mockMvc.perform(delete("/tags/{id}", 1))
+        mockMvc.perform(delete(API_PREFIX + "/tags/{id}", 1))
                 .andDo(log())
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/tags"))
+        mockMvc.perform(get(API_PREFIX + "/tags"))
                 .andDo(log())
                 .andExpect(jsonPath("$..tags.size()").value(5));
     }
@@ -212,10 +199,10 @@ class TagControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void testDeleteNotExistedTag() throws Exception {
-        mockMvc.perform(delete("/tags/{id}", 10))
+        mockMvc.perform(delete(API_PREFIX + "/tags/{id}", 10))
                 .andDo(log())
                 .andExpectAll(status().isNotFound(),
-                        jsonPath("$.fieldError.exception_message")
+                        jsonPath("$.fieldError.exceptionMessage")
                                 .value(is("No class com.epam.esm.entity.Tag entity with id 10 exists!")),
                         jsonPath("$.errorCode").value(is(40401)));
     }
@@ -223,22 +210,22 @@ class TagControllerTest {
     @Test
     @WithMockUser
     void testDeleteTagByUser() throws Exception {
-        mockMvc.perform(delete("/tags/{id}", 1))
+        mockMvc.perform(delete(API_PREFIX + "/tags/{id}", 1))
                 .andDo(log())
                 .andExpectAll(status().isForbidden(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        jsonPath("$.fieldError.exception_message").value(is("Access is denied")),
+                        jsonPath("$.fieldError.exceptionMessage").value(is("Access is denied")),
                         jsonPath("$.errorCode").value(is(40301)));
     }
 
     @Test
     @WithAnonymousUser
     void testDeleteTagByAnonymous() throws Exception {
-        mockMvc.perform(delete("/tags/{id}", 1))
+        mockMvc.perform(delete(API_PREFIX + "/tags/{id}", 1))
                 .andDo(log())
                 .andExpectAll(status().isUnauthorized(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        jsonPath("$.fieldError.exception_message")
+                        jsonPath("$.fieldError.exceptionMessage")
                                 .value(is("Full authentication is required to access this resource")),
                         jsonPath("$.errorCode").value(is(40101)));
     }

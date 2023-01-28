@@ -15,7 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.SPACE;
@@ -40,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
                 new ResourceNotFoundException("User with username " + username + " is not found"));
 
         Payment payment = Payment.builder()
-                .createdDate(LocalDateTime.now())
+                .createdDate(LocalDateTime.now(Clock.systemDefaultZone()).truncatedTo(ChronoUnit.MILLIS))
                 .user(user)
                 .build();
         payment.setOrders(orders);
@@ -115,6 +117,9 @@ public class PaymentServiceImpl implements PaymentService {
                 (order.getGiftCertificate() != null) ?
                         order.getGiftCertificate().getName() :
                         DELETED,
+                (order.getGiftCertificate() != null) ?
+                        order.getGiftCertificate().getDuration() :
+                        INTEGER_ZERO,
                 order.getCost());
     }
 }
