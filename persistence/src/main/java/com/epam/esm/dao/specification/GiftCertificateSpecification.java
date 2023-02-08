@@ -27,6 +27,14 @@ public interface GiftCertificateSpecification {
     Specification<GiftCertificate> hasDescription(String description);
 
     /**
+     * Matching gift certificate category
+     *
+     * @param category the category of gift certificate
+     * @return specification that matches gift certificate categories
+     */
+    Specification<GiftCertificate> hasCategory(String category);
+
+    /**
      * Matching tags that gift certificate contains
      *
      * @param tagNames the names of tag that is contained in gift certificate

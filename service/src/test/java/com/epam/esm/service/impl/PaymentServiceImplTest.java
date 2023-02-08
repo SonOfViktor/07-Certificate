@@ -17,16 +17,22 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceImplTest {
+    private static final Clock clock = Clock.fixed(Instant.parse("2023-01-05T00:00:00.001123Z"), ZoneOffset.UTC);
+
     @InjectMocks
     private PaymentServiceImpl paymentService;
 
@@ -44,12 +50,13 @@ class PaymentServiceImplTest {
 
     @Test
     void testCreatePayment() {
-        User user = new User(1, "Maks", "Silev");
+        User user = User.builder().userId(1).firstName("Maks").lastName("Silev").build();
 
         GiftCertificate giftCertificate = GiftCertificate.builder()
                 .giftCertificateId(1)
                 .price(new BigDecimal("40.00"))
                 .name("Oz.by")
+                .duration(10)
                 .build();
 
         UserOrder order = UserOrder.builder()
@@ -61,18 +68,19 @@ class PaymentServiceImplTest {
         Payment payment = Payment.builder()
                 .paymentId(1)
                 .orders(List.of(order))
-                .createdDate(LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0))
+                .createdDate(LocalDateTime.now(clock).truncatedTo(ChronoUnit.MILLIS))
                 .user(user)
                 .build();
 
+        mockStatic(Clock.class).when(Clock::systemDefaultZone).thenReturn(clock);
         when(userDao.findByEmail("user@mail.com")).thenReturn(Optional.of(user));
         when(giftCertificateDao.findById(1)).thenReturn(Optional.of(giftCertificate));
-        when(paymentDao.save(any(Payment.class))).thenReturn(payment);
+        when(paymentDao.save(payment)).thenReturn(payment);
 
         PaymentDto expected = new PaymentDto(
                 1, "Maks Silev",
-                List.of(new PaymentDto.UserOrderDto(1, "Oz.by", new BigDecimal("40.00"))),
-                LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0));
+                List.of(new PaymentDto.UserOrderDto(1, "Oz.by", 10, new BigDecimal("40.00"))),
+                LocalDateTime.now(clock).truncatedTo(ChronoUnit.MILLIS));
         PaymentDto actual = paymentService.addPayment("user@mail.com", List.of(1));
 
         assertEquals(expected, actual);
@@ -81,6 +89,9 @@ class PaymentServiceImplTest {
     @Test
     void testCreatePaymentWithoutUser() {
         List<Integer> certificateIdList = List.of(1);
+
+        when(giftCertificateDao.findById(1)).thenReturn(Optional.of(new GiftCertificate()));
+        when(userDao.findByEmail("absent@mail.com")).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () ->
                 paymentService.addPayment("absent@mail.com", certificateIdList));
@@ -104,7 +115,7 @@ class PaymentServiceImplTest {
 
         PaymentDto expected = new PaymentDto(
                 1, "Maks Silev",
-                List.of(new PaymentDto.UserOrderDto(1,"Oz.by", new BigDecimal("40.00"))),
+                List.of(new PaymentDto.UserOrderDto(1,"Oz.by", 10, new BigDecimal("40.00"))),
                 LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0));
         PaymentDto actual = paymentService.findPayment(1);
 
@@ -127,7 +138,7 @@ class PaymentServiceImplTest {
 
         List<PaymentDto> payments = List.of(new PaymentDto(
                 1, "Maks Silev",
-                List.of(new PaymentDto.UserOrderDto(1,"Oz.by", new BigDecimal("40.00"))),
+                List.of(new PaymentDto.UserOrderDto(1,"Oz.by", 10, new BigDecimal("40.00"))),
                 LocalDateTime.of(2022, 5, 29, 13, 49, 0, 0)));
 
         Page<PaymentDto> expected = new PageImpl<>(payments, pageable, 1);
@@ -150,6 +161,7 @@ class PaymentServiceImplTest {
         GiftCertificate giftCertificate = GiftCertificate.builder()
                 .giftCertificateId(1)
                 .name("Oz.by")
+                .duration(10)
                 .build();
         UserOrder order = UserOrder.builder()
                 .orderId(1)
@@ -157,7 +169,7 @@ class PaymentServiceImplTest {
                 .giftCertificate(giftCertificate)
                 .build();
 
-        PaymentDto.UserOrderDto orderDto = new PaymentDto.UserOrderDto(1, "Oz.by", new BigDecimal("40.00"));
+        PaymentDto.UserOrderDto orderDto = new PaymentDto.UserOrderDto(1, "Oz.by", 10, new BigDecimal("40.00"));
 
         when(userOrderDao.findAllByPaymentId(3, pageable)).thenReturn(new PageImpl<>(List.of(order), pageable, 1));
 
@@ -176,7 +188,7 @@ class PaymentServiceImplTest {
                 .giftCertificate(null)
                 .build();
 
-        PaymentDto.UserOrderDto orderDto = new PaymentDto.UserOrderDto(0, "DELETED", new BigDecimal("40.00"));
+        PaymentDto.UserOrderDto orderDto = new PaymentDto.UserOrderDto(0, "DELETED", 0, new BigDecimal("40.00"));
 
         when(userOrderDao.findAllByPaymentId(3, pageable)).thenReturn(new PageImpl<>(List.of(order), pageable, 1));
 
@@ -195,10 +207,11 @@ class PaymentServiceImplTest {
     }
 
     private Payment createPayment() {
-        User user = new User(1, "Maks", "Silev");
+        User user = User.builder().userId(1).firstName("Maks").lastName("Silev").build();
         GiftCertificate giftCertificate = GiftCertificate.builder()
                 .giftCertificateId(1)
                 .name("Oz.by")
+                .duration(10)
                 .build();
         UserOrder order = UserOrder.builder()
                 .orderId(1)

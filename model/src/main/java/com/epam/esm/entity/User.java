@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(schema = "module_4", name = "users")
+@Table(schema = "module_7", name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter
@@ -48,12 +48,6 @@ public class User {
     @ToString.Exclude
     @OneToMany(mappedBy = "user")
     private List<Payment> payments;
-
-    public User(int userId, String firstName, String lastName) {
-        this.userId = userId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
 
     @Override
     public boolean equals(Object o) {

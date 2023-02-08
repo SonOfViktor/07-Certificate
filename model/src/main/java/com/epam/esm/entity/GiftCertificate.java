@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "gift_certificates", schema = "module_4")
+@Table(name = "gift_certificates", schema = "module_7")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter
@@ -36,15 +36,21 @@ public class GiftCertificate {
 
     private LocalDateTime lastUpdateDate;
 
+    private String image;
+
     @Builder.Default
     @ManyToMany
-    @JoinTable(name = "gift_certificate_tag", schema = "module_4",
+    @JoinTable(name = "gift_certificate_tag", schema = "module_7",
             joinColumns = @JoinColumn(name = "gift_certificate_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
 
     @OneToMany(mappedBy = "giftCertificate")
     private List<UserOrder> userOrders;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate.truncatedTo(ChronoUnit.MILLIS);
@@ -59,15 +65,16 @@ public class GiftCertificate {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GiftCertificate that = (GiftCertificate) o;
-        return giftCertificateId == that.giftCertificateId && duration == that.duration &&
+        return duration == that.duration &&
                 Objects.equals(name, that.name) && Objects.equals(description, that.description) &&
                 Objects.equals(price, that.price) && Objects.equals(createDate, that.createDate) &&
-                Objects.equals(lastUpdateDate, that.lastUpdateDate);
+                Objects.equals(lastUpdateDate, that.lastUpdateDate) &&
+                Objects.equals(image, that.image);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(giftCertificateId, name, description, price, duration, createDate, lastUpdateDate);
+        return Objects.hash(name, description, price, duration, createDate, lastUpdateDate, image);
     }
 
     @Override
@@ -78,6 +85,7 @@ public class GiftCertificate {
                 "duration " + duration + " day(s)" +
                 ", price " + price +
                 ", createDate " + createDate +
-                ", lastUpdateDate " + lastUpdateDate;
+                ", lastUpdateDate " + lastUpdateDate +
+                ", image " + image;
     }
 }

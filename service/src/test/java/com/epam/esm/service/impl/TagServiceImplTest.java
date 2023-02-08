@@ -1,7 +1,6 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
-import com.epam.esm.dto.TagDto;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import javax.persistence.EntityExistsException;
 import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -40,29 +38,26 @@ class TagServiceImplTest {
 
     @Test
     void testAddTag() {
-        TagDto tagDto = new TagDto(0, "new");
         Tag tag = Tag.builder().name("new").build();
         Tag expected = Tag.builder().tagId(1).name("new").build();
 
         when(tagDao.save(tag)).thenReturn(expected);
 
-        Tag actual = tagService.addTag(tagDto);
+        Tag actual = tagService.addTag("new");
 
         assertEquals(expected, actual);
     }
 
     @Test
     void testAddExistedTag() {
-        TagDto tagDto = new TagDto(0, "new");
         Tag tag = Tag.builder().name("new").build();
         when(tagDao.existsByName(tag.getName())).thenReturn(true);
 
-        assertThrows(EntityExistsException.class, () -> tagService.addTag(tagDto));
+        assertThrows(EntityExistsException.class, () -> tagService.addTag("new"));
     }
 
     @Test
     void testAddTags() {
-        Set<TagDto> tagDtoSet = Set.of(new TagDto(0, "new"));
         Tag tag = Tag.builder().name("new").build();
         Tag createdTag = Tag.builder().tagId(1).name("new").build();
 
@@ -70,7 +65,7 @@ class TagServiceImplTest {
         when(tagDao.findOneByName("new")).thenReturn(Optional.empty());
 
         Set<Tag> expected = Set.of(createdTag);
-        Set<Tag> actual = tagService.addTags(tagDtoSet);
+        Set<Tag> actual = tagService.addTags(Set.of("new"));
 
         assertEquals(expected, actual);
     }
@@ -94,6 +89,14 @@ class TagServiceImplTest {
     }
 
     @Test
+    void testFindAllTagsOnEmptyPage() {
+        PageRequest pageable = PageRequest.of(99, 10);
+        when(tagDao.findAll(pageable)).thenReturn(Page.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->  tagService.findAllTags(pageable));
+    }
+
+    @Test
     void testFindTagsByCertificateId() {
         when(tagDao.findAllByGiftCertificatesId(1)).thenReturn(new HashSet<>(tags));
 
@@ -111,6 +114,15 @@ class TagServiceImplTest {
         Page<Tag> actual = tagService.findTagsByCertificateId(2, pageable);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void testFindTagsByCertificateIdWithPaginationOnEmptyPage() {
+        Pageable pageable = PageRequest.of(99, 10);
+
+        when(tagDao.findAllByGiftCertificatesId(2, pageable)).thenReturn(Page.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->  tagService.findTagsByCertificateId(2, pageable));
     }
 
     @Test

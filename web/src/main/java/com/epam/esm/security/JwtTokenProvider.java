@@ -20,13 +20,13 @@ public class JwtTokenProvider {
     public static final String ROLE_KEY = "role";
     private static final String BEARER = "Bearer";
 
-    @Value("${module4.jwt.secret}")
+    @Value("${module7.jwt.secret}")
     private String secretKey;
 
-    @Value("${module4.jwt.header}")
+    @Value("${module7.jwt.header}")
     private String authorizationHeader;
 
-    @Value("${module4.jwt.expiration-in-seconds}")
+    @Value("${module7.jwt.expiration-in-seconds}")
     private int validityInSeconds;
 
     public String createToken(String username, String role) {

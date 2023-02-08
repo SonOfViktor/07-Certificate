@@ -38,7 +38,7 @@ public class ExceptionAdviceController {
     public static final String UNIQUE_ENTITY_EXISTS = "unique_entity_exists";
     private static final String GLOBAL_EXCEPTION = "global_exception";
     private static final String METHOD_PARAMETER_NOT_VALID = "method_parameter_not_valid";
-    private static final String EXCEPTION_MESSAGE_MAP_KEY = "exception_message";
+    private static final String EXCEPTION_MESSAGE_MAP_KEY = "exceptionMessage";
 
     private final MessageSource messageSource;
 

@@ -38,8 +38,8 @@ class UserServiceImplTest {
     @BeforeEach
     void init() {
         Pageable pageable = PageRequest.of(1, 10);
-        userList = List.of(new User(1, "Margo", "Singer"),
-                new User(2, "Andrey", "Spider"));
+        userList = List.of(User.builder().userId(1).email("margo@gmail.com").firstName("Margo").lastName("Singer").build(),
+                User.builder().userId(2).email("andrew@gmail.com").firstName("Andrey").lastName("Spider").build());
 
         users = new PageImpl<>(userList, pageable, 2);
     }

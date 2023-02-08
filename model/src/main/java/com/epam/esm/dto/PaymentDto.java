@@ -19,6 +19,6 @@ public record PaymentDto(
 ) {
     private static final String DATE_JSON_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
-    public static record UserOrderDto(int certificateId, String certificateName, BigDecimal cost) {
+    public static record UserOrderDto(int certificateId, String certificateName, int duration, BigDecimal cost) {
     }
 }

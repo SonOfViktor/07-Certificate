@@ -11,7 +11,10 @@ public record GiftCertificateFilter(
         String certificateName,
 
         @Size(max = 45)
-        String certificateDescription) {
+        String certificateDescription,
+
+        @Size(max=15)
+        String category) {
 }
 
 

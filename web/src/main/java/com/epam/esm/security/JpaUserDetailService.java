@@ -1,5 +1,6 @@
 package com.epam.esm.security;
 
+import com.epam.esm.dto.SecurityUserDto;
 import com.epam.esm.entity.User;
 import com.epam.esm.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -14,14 +15,13 @@ import static org.springframework.security.core.userdetails.User.withUsername;
 @Component
 @RequiredArgsConstructor
 public class JpaUserDetailService implements UserDetailsService {
-    public static final String ROLE = "ROLE_";
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userService.findByEmail(email)
-                .map(this::createUserDetailsFromUser)
+                .map(this::createSecurityUserDtoFromUser)
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + email + " not found"));
     }
 
@@ -31,14 +31,14 @@ public class JpaUserDetailService implements UserDetailsService {
                Optional.empty();
     }
 
-    private UserDetails createUserDetailsFromUser(User user) {
-        return withUsername(user.getEmail())
-                .password(user.getPassword())
-                .authorities(ROLE + user.getRole().name())
-                .accountExpired(false)
-                .accountLocked(false)
-                .credentialsExpired(false)
-                .disabled(false)
+    private SecurityUserDto createSecurityUserDtoFromUser(User user) {
+        return new SecurityUserDto.Builder()
+                .withUserId(user.getUserId())
+                .withEmail(user.getEmail())
+                .withPassword(user.getPassword())
+                .withFirstName(user.getFirstName())
+                .withLastName(user.getLastName())
+                .withAuthorities(user.getRole().name())
                 .build();
     }
 

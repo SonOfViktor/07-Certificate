@@ -1,10 +1,7 @@
 package com.epam.esm.dao.specification.impl;
 
 import com.epam.esm.dao.specification.GiftCertificateSpecification;
-import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.GiftCertificate_;
-import com.epam.esm.entity.Tag;
-import com.epam.esm.entity.Tag_;
+import com.epam.esm.entity.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -29,13 +26,23 @@ public class GiftCertificateSpecificationImpl implements GiftCertificateSpecific
                                 String.format(LIKE_PATTERN, name.toLowerCase()));
     }
 
+    public Specification<GiftCertificate> hasCategory(String category) {
+        return isBlank(category) ? null :
+                (root, query, criteriaBuilder) -> {
+                    Join<GiftCertificate, Category> categoryJoin = root.join(GiftCertificate_.category);
+
+                    return criteriaBuilder.equal(
+                            criteriaBuilder.lower(categoryJoin.get(Category_.name)),
+                            category.toLowerCase());
+                };
+    }
+
     public Specification<GiftCertificate> hasDescription(String description) {
         return isBlank(description) ? null :
                 ((root, query, criteriaBuilder) ->
                         criteriaBuilder.like(
                                 criteriaBuilder.lower(root.get(GiftCertificate_.description)),
                                 String.format(LIKE_PATTERN, description.toLowerCase())));
-
     }
 
     public Specification<GiftCertificate> hasTags(List<String> tagNames) {

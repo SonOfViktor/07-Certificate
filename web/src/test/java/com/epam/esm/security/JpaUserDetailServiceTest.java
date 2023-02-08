@@ -1,5 +1,6 @@
 package com.epam.esm.security;
 
+import com.epam.esm.dto.SecurityUserDto;
 import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserRole;
 import com.epam.esm.service.UserService;
@@ -31,17 +32,20 @@ class JpaUserDetailServiceTest {
     @Test
     void testLoadUserByUsername() {
         User user = User.builder()
+                .userId(3)
                 .email("test@gmail.com")
+                .firstName("Vasiliy")
+                .lastName("Alibabaev")
                 .password("abra-codabra")
                 .role(UserRole.USER)
                 .build();
-        UserDetails expected = withUsername("test@gmail.com")
-                .password("abra-codabra")
-                .authorities("ROLE_USER")
-                .accountExpired(false)
-                .accountLocked(false)
-                .credentialsExpired(false)
-                .disabled(false)
+        UserDetails expected = new SecurityUserDto.Builder()
+                .withUserId(3)
+                .withEmail("test@gmail.com")
+                .withPassword("abra-codabra")
+                .withFirstName("Vasiliy")
+                .withLastName("Alibabaev")
+                .withAuthorities("USER")
                 .build();
 
         when(userService.findByEmail("test@gmail.com")).thenReturn(Optional.of(user));
